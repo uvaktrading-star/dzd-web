@@ -196,7 +196,7 @@ export default function SignupPage({
                         value={username}
                         onChange={e => setUsername(e.target.value)}
                         className="w-full h-12 sm:h-12 bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 text-slate-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all text-sm placeholder:text-slate-400"
-                        placeholder="handle"
+                        placeholder="username"
                       />
                     </div>
                   </div>
@@ -245,7 +245,7 @@ export default function SignupPage({
                   </div>
                   <div>
                     <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5 ml-1">
-                      Confirm
+                      Confirm Password
                     </label>
                     <div className="relative">
                       <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
@@ -324,7 +324,7 @@ export default function SignupPage({
                     onClick={onSwitchToLogin}
                     className="font-black text-blue-600 hover:text-blue-700 underline underline-offset-4 transition-colors"
                   >
-                    Login
+                    LOGIN
                   </button>
                 </p>
               </form>
