@@ -1,6 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { auth, db } from './firebase';
 import Navbar from './Navbar';
 import LandingPage from './LandingPage';
 import LoginPage from './LoginPage';
@@ -12,6 +15,7 @@ import ForgotPasswordPage from './ForgotPasswordPage';
 export default function App() {
   const [theme, setTheme] = useState('dark');
   const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const [showLogin, setShowLogin] = useState(false);
   const [showSignup, setShowSignup] = useState(false);
 
@@ -20,8 +24,23 @@ export default function App() {
     setTheme(savedTheme);
     document.documentElement.classList.toggle('dark', savedTheme === 'dark');
     
-    const savedUser = localStorage.getItem('user');
-    if (savedUser) setUser(JSON.parse(savedUser));
+    // Firebase Auth State Listener
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        // Fetch additional data from Firestore
+        const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+        if (userDoc.exists()) {
+          setUser({ uid: firebaseUser.uid, email: firebaseUser.email, ...userDoc.data() });
+        } else {
+          setUser({ uid: firebaseUser.uid, email: firebaseUser.email, name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] });
+        }
+      } else {
+        setUser(null);
+      }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
   }, []);
 
   // Lock body scroll when modals are open
@@ -42,25 +61,31 @@ export default function App() {
 
   const handleAuth = (u: any) => {
     setUser(u);
-    localStorage.setItem('user', JSON.stringify(u));
     setShowLogin(false);
     setShowSignup(false);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await auth.signOut();
     setUser(null);
-    localStorage.removeItem('user');
   };
 
   const handleOnboardingComplete = (data: any) => {
     const updatedUser = { ...user, ...data, onboarded: true };
     setUser(updatedUser);
-    localStorage.setItem('user', JSON.stringify(updatedUser));
   };
 
   const openLogin = () => { setShowLogin(true); setShowSignup(false); };
   const openSignup = () => { setShowSignup(true); setShowLogin(false); };
   const closeModals = () => { setShowLogin(false); setShowSignup(false); };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-dark flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
     <HashRouter>
