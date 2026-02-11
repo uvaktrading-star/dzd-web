@@ -186,7 +186,7 @@ export default function Navbar({ theme, toggleTheme, user, onLogout, onLoginClic
               ) : (
                 <div className="flex flex-col gap-4">
                    <button onClick={() => { onLoginClick(); closeMobileMenu(); }} className="w-full py-6 text-slate-900 dark:text-white font-black uppercase tracking-widest text-xs border border-slate-200 dark:border-white/10 rounded-[1.5rem] bg-slate-50 dark:bg-white/5 active:bg-slate-100">Login</button>
-                   <button onClick={() => { onSignupClick(); closeMobileMenu(); }} className="w-full py-6 bg-blue-600 text-white font-black uppercase tracking-widest text-xs rounded-[1.5rem] shadow-xl shadow-blue-600/20 active:scale-[0.98] transition-all">Join The Resistance</button>
+                   <button onClick={() => { onSignupClick(); closeMobileMenu(); }} className="w-full py-6 bg-blue-600 text-white font-black uppercase tracking-widest text-xs rounded-[1.5rem] shadow-xl shadow-blue-600/20 active:scale-[0.98] transition-all">Join</button>
                 </div>
               )}
             </div>
