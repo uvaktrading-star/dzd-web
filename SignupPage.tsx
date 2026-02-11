@@ -9,11 +9,8 @@ import {
   Check,
   Zap,
   ArrowRight,
-  ShieldCheck,
-  Smartphone,
   X,
-  Loader2,
-  ShieldCheck as ShieldIcon
+  Loader2
 } from "lucide-react";
 import {
   createUserWithEmailAndPassword,
@@ -41,11 +38,6 @@ export default function SignupPage({
   const [agreed, setAgreed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [strength, setStrength] = useState({
-    label: "",
-    color: "bg-slate-200",
-    score: 0,
-  });
 
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -53,32 +45,11 @@ export default function SignupPage({
     return () => window.removeEventListener("keydown", handleEsc);
   }, [onClose]);
 
-  useEffect(() => {
-    if (!password) {
-      setStrength({ label: "", color: "bg-slate-100", score: 0 });
-      return;
-    }
-    let score = 0;
-    if (password.length >= 8) score++;
-    if (/[0-9]/.test(password)) score++;
-    if (/[A-Z]/.test(password)) score++;
-    if (/[^A-Za-z0-9]/.test(password)) score++;
-
-    if (score <= 1)
-      setStrength({ label: "Weak", color: "bg-red-500", score: 1 });
-    else if (score === 2)
-      setStrength({ label: "Medium", color: "bg-yellow-500", score: 2 });
-    else if (score === 3)
-      setStrength({ label: "Strong", color: "bg-blue-500", score: 3 });
-    else
-      setStrength({ label: "Very Strong", color: "bg-green-500", score: 4 });
-  }, [password]);
-
   const handleAuthSuccess = () => {
     setSuccess(true);
     setTimeout(() => {
       window.location.href = '/'; 
-    }, 1500);
+    }, 2000);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -129,17 +100,16 @@ export default function SignupPage({
 
       <div className="w-full max-w-5xl flex flex-col lg:flex-row bg-white rounded-[2rem] md:rounded-[2.5rem] overflow-hidden shadow-2xl animate-scale-in border border-slate-100 relative z-10 my-auto">
         
-        {/* Success Overlay */}
+        {/* Premium Success Overlay */}
         {success && (
-          <div className="absolute inset-0 z-50 bg-[#020617] flex flex-col items-center justify-center animate-fade-in text-center p-8">
-            <div className="w-16 h-16 bg-blue-600/10 rounded-2xl flex items-center justify-center text-blue-500 mb-6">
-              <ShieldIcon size={32} />
+          <div className="absolute inset-0 z-50 flex items-center justify-center p-6 bg-black/60 backdrop-blur-2xl animate-fade-in">
+            <div className="bg-white/10 border border-white/20 backdrop-blur-3xl p-10 rounded-[2.5rem] max-w-sm w-full text-center shadow-[0_0_50px_rgba(59,130,246,0.2)] animate-scale-in">
+              <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-white mx-auto mb-6 shadow-xl shadow-blue-600/40 transform scale-110">
+                <Check size={32} strokeWidth={3} />
+              </div>
+              <h2 className="text-2xl font-black text-white mb-3 tracking-tighter uppercase">Congratulations!</h2>
+              <p className="text-blue-200/60 text-xs font-bold tracking-[0.2em] uppercase leading-relaxed">Identity Secured.<br />Initializing Account...</p>
             </div>
-            <h2 className="text-2xl font-black text-white mb-2 tracking-tighter uppercase">Identity Secured</h2>
-            <div className="w-40 h-1 bg-white/5 rounded-full mt-6 overflow-hidden">
-              <div className="h-full bg-blue-600 animate-[loading_1.5s_ease-in-out_forwards]"></div>
-            </div>
-            <style>{`@keyframes loading { 0% { width: 0%; } 100% { width: 100%; } }`}</style>
           </div>
         )}
 
@@ -248,8 +218,8 @@ export default function SignupPage({
               Google Authority
             </button>
             
-            <p className="mt-6 text-center text-[10px] font-bold uppercase tracking-widest text-slate-400 pb-8">
-              Member? <button onClick={onSwitchToLogin} className="font-black text-blue-600 ml-1 underline underline-offset-4">Link Hub</button>
+            <p className="mt-10 text-center text-[10px] font-bold uppercase tracking-widest text-slate-400 pb-16">
+              Already a Member? <button onClick={onSwitchToLogin} className="font-black text-blue-600 ml-1 underline underline-offset-4 hover:text-blue-700 transition-colors">Access Link Hub</button>
             </p>
           </div>
         </div>

@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Lock, User, Eye, EyeOff, ShieldCheck, Headphones, X, ShieldCheck as ShieldIcon, Loader2, Sparkles, Zap, Check } from 'lucide-react';
+import { Lock, User, Eye, EyeOff, X, Check, Loader2, Zap } from 'lucide-react';
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from './firebase';
@@ -26,7 +26,7 @@ export default function LoginPage({ onLogin, onClose, onSwitchToSignup }: { onLo
     setError('');
     setTimeout(() => {
       window.location.href = '/'; 
-    }, 1500);
+    }, 2000);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -75,20 +75,17 @@ export default function LoginPage({ onLogin, onClose, onSwitchToSignup }: { onLo
       <div className="fixed inset-0 cursor-pointer -z-10" onClick={onClose} />
       
       <div className="w-full max-w-5xl flex flex-col lg:flex-row rounded-[2.5rem] overflow-hidden shadow-[0_48px_100px_-12px_rgba(0,0,0,1)] animate-scale-in border border-white/10 bg-[#020617] relative z-10 min-h-[600px]">
-        {/* Success Overlay */}
+        
+        {/* Premium Success Overlay */}
         {success && (
-          <div className="absolute inset-0 z-50 bg-[#020617] flex flex-col items-center justify-center animate-fade-in text-center p-10">
-            <div className="relative mb-8">
-              <div className="w-24 h-24 bg-blue-600/10 rounded-[2rem] flex items-center justify-center text-blue-500 animate-pulse border border-blue-500/30">
-                <ShieldIcon size={40} />
+          <div className="absolute inset-0 z-50 flex items-center justify-center p-6 bg-black/60 backdrop-blur-2xl animate-fade-in">
+            <div className="bg-white/10 border border-white/20 backdrop-blur-3xl p-10 rounded-[2.5rem] max-w-sm w-full text-center shadow-[0_0_50px_rgba(59,130,246,0.2)] animate-scale-in">
+              <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-white mx-auto mb-6 shadow-xl shadow-blue-600/40 transform scale-110">
+                <Check size={32} strokeWidth={3} />
               </div>
+              <h2 className="text-2xl font-black text-white mb-3 tracking-tighter uppercase">Access Granted</h2>
+              <p className="text-blue-200/60 text-xs font-bold tracking-[0.2em] uppercase leading-relaxed">Logging success.<br />Redirecting to homepage...</p>
             </div>
-            <h2 className="text-3xl font-black text-white mb-2 tracking-tighter uppercase">Identity Verified</h2>
-            <p className="text-slate-500 text-xs font-bold tracking-[0.3em] uppercase">Initializing Secure Session</p>
-            <div className="w-48 h-1 bg-white/5 rounded-full mt-10 overflow-hidden">
-              <div className="h-full bg-blue-600 animate-[loading_1.5s_ease-in-out_forwards]"></div>
-            </div>
-            <style>{`@keyframes loading { 0% { width: 0%; } 100% { width: 100%; } }`}</style>
           </div>
         )}
 
