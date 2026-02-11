@@ -192,7 +192,7 @@ export default function Navbar({ theme, toggleTheme, user, onLogout, onLoginClic
             </div>
             
             <div className="pt-10 text-center">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">DzD Global Network v2.0</p>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">DzD Marketing v1.0</p>
             </div>
           </div>
         </div>
