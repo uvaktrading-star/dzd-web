@@ -127,34 +127,42 @@ export default function SignupPage({
   };
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-0 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in overflow-hidden">
       {/* Background Overlay Click to Close */}
       <div className="fixed inset-0 cursor-pointer" onClick={onClose} />
 
-      <div className="relative w-full max-w-5xl bg-white rounded-3xl shadow-2xl overflow-hidden animate-scale-in">
-        {/* Close Button */}
+      <div className="relative w-full h-full sm:h-auto sm:max-w-5xl bg-white sm:rounded-3xl shadow-2xl overflow-y-auto sm:overflow-hidden animate-scale-in">
+        {/* Close Button - Hidden on mobile, visible on desktop */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 z-20 w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200 transition-all"
+          className="hidden sm:flex absolute top-5 right-5 z-20 w-9 h-9 rounded-full bg-slate-100 items-center justify-center text-slate-600 hover:bg-slate-200 transition-all"
         >
           <X size={18} />
         </button>
 
-        <div className="flex flex-col lg:flex-row">
-          {/* Left Side - Brand Story */}
-          <div className="lg:w-5/12 bg-gradient-to-br from-slate-50 to-white p-8 lg:p-10 border-b lg:border-b-0 lg:border-r border-slate-100">
+        {/* Mobile Close Button - Visible only on mobile */}
+        <button
+          onClick={onClose}
+          className="sm:hidden absolute top-4 right-4 z-20 w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200 transition-all"
+        >
+          <X size={20} />
+        </button>
+
+        <div className="flex flex-col lg:flex-row h-full sm:h-auto">
+          {/* Left Side - Brand Story - Hidden on mobile, visible on desktop */}
+          <div className="hidden lg:flex lg:w-5/12 bg-gradient-to-br from-slate-50 to-white p-10 border-r border-slate-100">
             <div className="h-full flex flex-col">
-              <div className="flex items-center gap-2 mb-8 lg:mb-12">
-                <div className="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-md">
-                  <Zap size={20} fill="white" />
+              <div className="flex items-center gap-2 mb-12">
+                <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-md">
+                  <Zap size={22} fill="white" />
                 </div>
-                <span className="text-lg font-bold text-slate-900">
+                <span className="text-xl font-bold text-slate-900">
                   DZD<span className="text-blue-600">MARKETING</span>
                 </span>
               </div>
 
               <div className="flex-1 flex flex-col justify-center">
-                <h2 className="text-3xl lg:text-4xl font-black text-slate-900 leading-tight mb-8">
+                <h2 className="text-4xl font-black text-slate-900 leading-tight mb-10">
                   Elevate your
                   <br />
                   social presence
@@ -162,7 +170,7 @@ export default function SignupPage({
                   <span className="text-blue-600">instantly.</span>
                 </h2>
 
-                <div className="space-y-4">
+                <div className="space-y-5">
                   {[
                     {
                       icon: Zap,
@@ -183,11 +191,11 @@ export default function SignupPage({
                       bg: "bg-emerald-100",
                     },
                   ].map((item, i) => (
-                    <div key={i} className="flex items-center gap-3">
+                    <div key={i} className="flex items-center gap-4">
                       <div
-                        className={`w-8 h-8 rounded-lg ${item.bg} flex items-center justify-center`}
+                        className={`w-9 h-9 rounded-lg ${item.bg} flex items-center justify-center`}
                       >
-                        <item.icon size={16} className={item.color} />
+                        <item.icon size={18} className={item.color} />
                       </div>
                       <span className="text-xs font-bold text-slate-700 tracking-wider">
                         {item.text}
@@ -199,11 +207,19 @@ export default function SignupPage({
             </div>
           </div>
 
-          {/* Right Side - Form */}
-          <div className="lg:w-7/12 p-8 lg:p-10">
-            <div className="max-w-md mx-auto">
+          {/* Right Side - Form - Full width on mobile, 7/12 on desktop */}
+          <div className="w-full lg:w-7/12 flex items-center justify-center p-6 sm:p-8 lg:p-10 min-h-screen sm:min-h-0">
+            <div className="w-full max-w-md mx-auto">
               {/* Header */}
-              <div className="mb-8">
+              <div className="mb-8 text-center lg:text-left">
+                <div className="flex items-center justify-center lg:hidden mb-6">
+                  <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-md">
+                    <Zap size={22} fill="white" />
+                  </div>
+                  <span className="text-xl font-bold text-slate-900 ml-2">
+                    DZD<span className="text-blue-600">MARKETING</span>
+                  </span>
+                </div>
                 <h3 className="text-2xl lg:text-3xl font-bold text-slate-900 mb-2">
                   Create Identity
                 </h3>
@@ -230,7 +246,7 @@ export default function SignupPage({
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
                         placeholder="Name"
-                        className="w-full h-11 pl-9 pr-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all"
+                        className="w-full h-12 sm:h-11 pl-9 pr-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all"
                         required
                       />
                     </div>
@@ -248,7 +264,7 @@ export default function SignupPage({
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         placeholder="handle"
-                        className="w-full h-11 pl-8 pr-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all"
+                        className="w-full h-12 sm:h-11 pl-8 pr-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all"
                         required
                       />
                     </div>
@@ -270,7 +286,7 @@ export default function SignupPage({
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="mail@example.com"
-                      className="w-full h-11 pl-9 pr-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all"
+                      className="w-full h-12 sm:h-11 pl-9 pr-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all"
                       required
                     />
                   </div>
@@ -291,7 +307,7 @@ export default function SignupPage({
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full h-11 pl-9 pr-10 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all"
+                      className="w-full h-12 sm:h-11 pl-9 pr-10 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all"
                       required
                     />
                     <button
@@ -344,7 +360,7 @@ export default function SignupPage({
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="Repeat password"
-                      className={`w-full h-11 pl-9 pr-3 bg-slate-50 border rounded-xl text-sm text-slate-900 placeholder:text-slate-400 outline-none transition-all ${
+                      className={`w-full h-12 sm:h-11 pl-9 pr-3 bg-slate-50 border rounded-xl text-sm text-slate-900 placeholder:text-slate-400 outline-none transition-all ${
                         confirmPassword && password !== confirmPassword
                           ? "border-red-300 bg-red-50/50 focus:border-red-500 focus:ring-red-500"
                           : "border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
@@ -389,7 +405,7 @@ export default function SignupPage({
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="w-full h-12 sm:h-12 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   {loading ? (
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -417,7 +433,7 @@ export default function SignupPage({
                 <button
                   type="button"
                   onClick={handleGoogleSignup}
-                  className="w-full h-11 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-medium rounded-xl flex items-center justify-center gap-2.5 transition-all"
+                  className="w-full h-12 sm:h-11 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-medium rounded-xl flex items-center justify-center gap-2.5 transition-all"
                 >
                   <svg className="w-5 h-5" viewBox="0 0 24 24">
                     <path
@@ -441,7 +457,7 @@ export default function SignupPage({
                 </button>
 
                 {/* Login Link */}
-                <p className="text-center text-sm text-slate-500 mt-6">
+                <p className="text-center text-sm text-slate-500 mt-6 pb-4 lg:pb-0">
                   Member already?{" "}
                   <button
                     type="button"
