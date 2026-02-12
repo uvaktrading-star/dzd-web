@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   Search, 
@@ -31,6 +30,8 @@ export default function ServicesPageView() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [visibleCount, setVisibleCount] = useState(25);
+  const [showHeader, setShowHeader] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const PAGE_SIZE = 40;
@@ -56,6 +57,28 @@ export default function ServicesPageView() {
     loadServices();
   }, []);
 
+  // Handle scroll to hide/show header
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      // Hide header when scrolling down, show when scrolling up
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setShowHeader(false);
+      } else {
+        setShowHeader(true);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [lastScrollY]);
+
   const categories = useMemo(() => {
     return ['All', ...Array.from(new Set(services.map(s => String(s.category))))];
   }, [services]);
@@ -79,8 +102,12 @@ export default function ServicesPageView() {
 
   return (
     <div className="relative animate-fade-in pb-32">
-      {/* Sticky Command Bridge - Frosted UI */}
-      <div className="sticky top-[-2rem] md:top-[-3rem] z-40 -mx-4 md:-mx-8 lg:-mx-12 px-4 md:px-8 lg:px-12 pt-6 md:pt-8 pb-4 bg-[#fcfdfe]/80 dark:bg-[#020617]/80 backdrop-blur-2xl border-b border-slate-200 dark:border-white/5 shadow-sm transition-all">
+      {/* Sticky Command Bridge - Frosted UI - Hides on scroll down */}
+      <div 
+        className={`sticky top-[-2rem] md:top-[-3rem] z-40 -mx-4 md:-mx-8 lg:-mx-12 px-4 md:px-8 lg:px-12 pt-6 md:pt-8 pb-4 bg-[#fcfdfe]/80 dark:bg-[#020617]/80 backdrop-blur-2xl border-b border-slate-200 dark:border-white/5 shadow-sm transition-all duration-300 ${
+          showHeader ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0 pointer-events-none'
+        }`}
+      >
         <div className="max-w-6xl mx-auto space-y-4 md:space-y-6">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
@@ -123,6 +150,40 @@ export default function ServicesPageView() {
                    {cat}
                  </button>
                ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Mini header appears when main header is hidden - only shows search and categories */}
+      <div 
+        className={`sticky top-0 z-40 -mx-4 md:-mx-8 lg:-mx-12 px-4 md:px-8 lg:px-12 py-3 bg-[#fcfdfe]/95 dark:bg-[#020617]/95 backdrop-blur-2xl border-b border-slate-200 dark:border-white/5 shadow-sm transition-all duration-300 md:hidden ${
+          showHeader ? '-translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'
+        }`}
+      >
+        <div className="max-w-6xl mx-auto">
+          <div className="flex flex-col gap-2">
+            <div className="relative group">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={16} />
+              <input 
+                type="text" 
+                placeholder="Search protocols..." 
+                value={searchTerm}
+                onChange={(e) => { setSearchTerm(e.target.value); setVisibleCount(25); }}
+                className="w-full bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl py-2.5 pl-9 pr-4 font-bold text-xs focus:border-blue-600 outline-none transition-all"
+              />
+            </div>
+            
+            <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+              {categories.slice(0, 8).map(cat => (
+                <button 
+                  key={cat} 
+                  onClick={() => { setActiveCategory(cat); setVisibleCount(25); }}
+                  className={`px-3 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest whitespace-nowrap transition-all border ${activeCategory === cat ? 'bg-blue-600 text-white border-blue-600' : 'bg-white dark:bg-white/5 text-slate-500 border-slate-200 dark:border-white/5'}`}
+                >
+                  {cat}
+                </button>
+              ))}
             </div>
           </div>
         </div>
