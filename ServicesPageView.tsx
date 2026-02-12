@@ -187,7 +187,8 @@ export default function ServicesPageView() {
         </div>
       </div>
 
-      <div className="mt-8">
+      {/* Services Grid - Removed top padding */}
+      <div className="mt-0">
         {/* Desktop Data Grid */}
         <div className="hidden md:block bg-white dark:bg-[#0f172a]/40 rounded-[2.5rem] border border-slate-200 dark:border-white/5 overflow-hidden shadow-sm">
           <table className="w-full text-left">
@@ -297,9 +298,16 @@ export default function ServicesPageView() {
         </div>
       )}
 
-      {/* Floating Scroll To Top for Mobile UX */}
+      {/* Floating Scroll To Top for Mobile UX - FIXED */}
       <button 
-        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        onClick={() => {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+          setShowHeader(true);
+          setLastScrollY(0);
+        }}
         className="fixed bottom-24 right-6 md:right-10 w-12 h-12 bg-white dark:bg-slate-900 rounded-full flex items-center justify-center text-blue-600 shadow-2xl border border-slate-200 dark:border-white/10 z-50 md:hidden active:scale-90 transition-transform"
       >
         <ChevronUp size={24} />
