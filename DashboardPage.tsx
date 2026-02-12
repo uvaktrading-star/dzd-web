@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Navigate } from 'react-router-dom';
 import { 
   ChevronLeft, 
@@ -59,6 +59,7 @@ export const fetchSmmApi = async (params: Record<string, string>) => {
 };
 
 export default function DashboardPage({ user }: any) {
+  const mainRef = useRef<HTMLDivElement>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useState('home');
   const [balance, setBalance] = useState<string | null>(null);
@@ -159,12 +160,19 @@ export default function DashboardPage({ user }: any) {
       </aside>
 
       {/* MAIN CONTENT AREA */}
-      <main className="flex-1 overflow-y-auto no-scrollbar p-4 md:p-8 lg:p-12 relative pb-32 md:pb-12 bg-[#fcfdfe] dark:bg-[#020617]">
+      <main
+  ref={mainRef}
+  className="flex-1 overflow-y-auto no-scrollbar p-4 md:p-8 lg:p-12 relative pb-32 md:pb-12 bg-[#fcfdfe] dark:bg-[#020617]"
+>
+
         <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] opacity-10 pointer-events-none"></div>
 
         <div className="max-w-6xl mx-auto relative z-10">
           {activeTab === 'home' && <DashboardHomeView user={user} balance={balance} />}
-          {activeTab === 'services' && <ServicesPageView />}
+          {activeTab === 'services' && (
+  <ServicesPageView scrollContainerRef={mainRef} />
+)}
+
           
           {(!['home', 'services'].includes(activeTab)) && (
             <div className="h-[60vh] flex flex-col items-center justify-center text-center animate-fade-in bg-white dark:bg-white/5 rounded-[3.5rem] border border-slate-200 dark:border-white/5 p-12">
