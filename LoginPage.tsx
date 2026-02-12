@@ -237,7 +237,8 @@ export default function LoginPage({ onLogin, onClose, onSwitchToSignup }: { onLo
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white font-black h-12 lg:h-14 rounded-xl shadow-2xl shadow-blue-600/20 flex items-center justify-center gap-3 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed uppercase tracking-[0.2em] text-xs lg:text-sm mt-4 lg:mt-6"
                 >
                   {loading ? (
-                    <Loader2 className="animate-spin" size={18} className="lg:w-5 lg:h-5" />
+                    // ✅ CORRECT - merge them into one
+<Loader2 className="animate-spin lg:w-5 lg:h-5" size={18} />
                   ) : (
                     'Loging'
                   )}
