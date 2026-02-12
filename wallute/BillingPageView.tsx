@@ -5,27 +5,75 @@ import {
   ArrowUpRight, Clock, CheckCircle2 
 } from 'lucide-react';
 
+// ඔයාගේ Cloudflare Worker URL එක මෙතනට දාන්න
+const WORKER_URL = "https://dzd-billing-api.sitewasd2026.workers.dev";
+
 export default function BillingPageView({ user }: any) {
   const [amount, setAmount] = useState('');
   const [uploading, setUploading] = useState(false);
-  const [userBalance, setUserBalance] = useState({ total: "0.00", pending: "0.00" });
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [userBalance, setUserBalance] = useState({ total_balance: "0.00", pending_balance: "0.00" });
 
-  // පස්සේ කාලෙකදී Cloudflare D1 එකෙන් ඇත්තම බැලන්ස් එක මෙතනට ගන්න පුළුවන්
+  // 1. Cloudflare D1 එකෙන් ඇත්තම බැලන්ස් එක ගන්නා ආකාරය
+  const fetchBalance = async (uid: string) => {
+    try {
+      const response = await fetch(`${WORKER_URL}/get-balance?userId=${uid}`);
+      const data = await response.json();
+      setUserBalance({
+        total_balance: parseFloat(data.total_balance || 0).toFixed(2),
+        pending_balance: parseFloat(data.pending_balance || 0).toFixed(2)
+      });
+    } catch (error) {
+      console.error("Error fetching balance:", error);
+    }
+  };
+
   useEffect(() => {
-    if (user) {
-      console.log("Fetching wallet for UID:", user.uid);
-      // fetchBalance(user.uid); 
+    if (user?.uid) {
+      fetchBalance(user.uid);
+      // සෑම විනාඩි 5කට වරක් බැලන්ස් එක Refresh කරන්න (Optional)
+      const interval = setInterval(() => fetchBalance(user.uid), 300000);
+      return () => clearInterval(interval);
     }
   }, [user]);
 
+  // 2. රිසිට් එක Cloudflare Worker (R2 + D1) වෙත යවන ආකාරය
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!selectedFile || !user) {
+      alert("කරුණාකර රිසිට් පත තෝරන්න.");
+      return;
+    }
+
     setUploading(true);
-    // Cloudflare Worker API එකට රිසිට් එක යවන Logic එක මෙතනට එයි
-    setTimeout(() => {
-      alert(`ID: ${user.uid} සඳහා තැන්පතු ඉල්ලීම යොමු කළා!`);
+
+    const formData = new FormData();
+    formData.append("userId", user.uid);
+    formData.append("email", user.email || "no-email");
+    formData.append("amount", amount);
+    formData.append("receipt", selectedFile);
+
+    try {
+      const response = await fetch(`${WORKER_URL}/submit-deposit`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (response.ok) {
+        alert(`ID: ${user.uid} සඳහා තැන්පතු ඉල්ලීම සාර්ථකව යොමු කළා!`);
+        setAmount('');
+        setSelectedFile(null);
+        // බැලන්ස් එක වහාම Refresh කරන්න
+        fetchBalance(user.uid);
+      } else {
+        throw new Error("Upload failed");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("යම් දෝෂයක් සිදු විය. කරුණාකර නැවත උත්සාහ කරන්න.");
+    } finally {
       setUploading(false);
-    }, 2000);
+    }
   };
 
   return (
@@ -42,7 +90,6 @@ export default function BillingPageView({ user }: any) {
           </p>
         </div>
         
-        {/* Support Button */}
         <button className="flex items-center gap-3 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 px-6 py-3 rounded-2xl hover:bg-blue-600 hover:text-white transition-all group">
           <MessageSquare size={18} className="text-blue-500 group-hover:text-white" />
           <span className="text-[11px] font-black uppercase tracking-widest">Customer Support</span>
@@ -54,7 +101,7 @@ export default function BillingPageView({ user }: any) {
         <div className="bg-blue-600 rounded-[2.5rem] p-8 text-white shadow-2xl shadow-blue-600/30 relative overflow-hidden group">
           <div className="relative z-10">
             <p className="text-[10px] font-black uppercase tracking-[0.2em] mb-2 opacity-80 italic">Available Credits</p>
-            <h3 className="text-5xl font-black italic tracking-tighter tabular-nums">LKR {userBalance.total}</h3>
+            <h3 className="text-5xl font-black italic tracking-tighter tabular-nums">LKR {userBalance.total_balance}</h3>
             <div className="mt-6 flex items-center gap-2 text-[10px] font-bold uppercase bg-white/10 w-fit px-3 py-1 rounded-full">
               <CheckCircle2 size={12} /> Active Wallet
             </div>
@@ -64,7 +111,7 @@ export default function BillingPageView({ user }: any) {
 
         <div className="bg-white dark:bg-[#050b1a] border border-slate-200 dark:border-white/5 rounded-[2.5rem] p-8 relative overflow-hidden group">
           <p className="text-[10px] font-black uppercase tracking-[0.2em] mb-2 text-slate-500 italic">Pending Clearance</p>
-          <h3 className="text-5xl font-black italic tracking-tighter tabular-nums text-slate-900 dark:text-white">LKR {userBalance.pending}</h3>
+          <h3 className="text-5xl font-black italic tracking-tighter tabular-nums text-slate-900 dark:text-white">LKR {userBalance.pending_balance}</h3>
           <div className="mt-6 flex items-center gap-2 text-[10px] font-bold uppercase text-amber-500 bg-amber-500/10 w-fit px-3 py-1 rounded-full">
             <Clock size={12} /> Verifying Proofs
           </div>
@@ -137,8 +184,16 @@ export default function BillingPageView({ user }: any) {
                   <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-2 italic">Receipt Image</label>
                   <label className="flex items-center gap-4 w-full bg-slate-50 dark:bg-white/5 p-4 rounded-2xl cursor-pointer hover:bg-slate-100 dark:hover:bg-white/10 transition-all border border-slate-200 dark:border-white/10">
                     <Upload className="text-blue-500" size={20} />
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Select File</span>
-                    <input type="file" className="hidden" accept="image/*" required />
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 truncate">
+                      {selectedFile ? selectedFile.name : 'Select File'}
+                    </span>
+                    <input 
+                      type="file" 
+                      className="hidden" 
+                      accept="image/*" 
+                      onChange={(e) => setSelectedFile(e.target.files ? e.target.files[0] : null)}
+                      required 
+                    />
                   </label>
                 </div>
               </div>
@@ -155,7 +210,7 @@ export default function BillingPageView({ user }: any) {
                 disabled={uploading}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-[0.3em] py-5 rounded-2xl shadow-xl shadow-blue-600/20 transition-all hover:scale-[1.01] active:scale-95 disabled:opacity-50 text-xs"
               >
-                {uploading ? 'Encrypting & Sending...' : 'Execute Transaction Proof'}
+                {uploading ? 'Processing Transaction...' : 'Execute Transaction Proof'}
               </button>
             </form>
           </div>
@@ -165,7 +220,7 @@ export default function BillingPageView({ user }: any) {
       {/* --- FOOTER SECTION --- */}
       <div className="mt-20 pt-10 border-t border-slate-200 dark:border-white/5 text-center">
          <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.5em]">
-           DZD Financial Node v4.0.2 • Verified by Firebase Auth
+           DZD Financial Node v4.0.2 • Verified by Firebase Auth & Cloudflare D1
          </p>
       </div>
 
