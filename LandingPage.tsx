@@ -16,6 +16,7 @@ import {
   Clock, 
   TrendingUp 
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom'; // Navigation සඳහා එක් කළා
 import Footer from './Footer';
 
 const RevealSection: React.FC<{ children: React.ReactNode, className?: string }> = ({ children, className = "" }) => {
@@ -45,6 +46,7 @@ const RevealSection: React.FC<{ children: React.ReactNode, className?: string }>
 
 export default function LandingPage({ onSignupClick }: { onSignupClick?: () => void }) {
   const [selectedPlatform, setSelectedPlatform] = useState('all');
+  const navigate = useNavigate(); // Navigation function එක create කිරීම
 
   const platforms = {
     all: { 
@@ -98,7 +100,7 @@ export default function LandingPage({ onSignupClick }: { onSignupClick?: () => v
                 </p>
                 <div className="flex flex-col sm:flex-row gap-5">
                   <button 
-                    onClick={onSignupClick}
+                    onClick={() => navigate('/billing')} // මෙතනින් Wallet පේජ් එකට යනවා
                     className="group bg-blue-600 hover:bg-blue-700 text-white px-10 py-5 rounded-[1.5rem] font-black text-lg flex items-center justify-center gap-3 shadow-2xl shadow-blue-600/30 transition-all hover:-translate-y-1 active:scale-95"
                   >
                     Launch Empire <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
@@ -113,21 +115,17 @@ export default function LandingPage({ onSignupClick }: { onSignupClick?: () => v
             <div className="relative">
               <RevealSection className="lg:pl-10">
                 <div className="relative group">
-                  {/* Real Dashboard Image Visual */}
                   <div className="glass p-3 rounded-[3.5rem] shadow-[0_50px_100px_-15px_rgba(0,0,0,0.6)] animate-float border-white/10 relative overflow-hidden group-hover:rotate-1 transition-transform duration-700">
                     <div className="bg-[#050b1a] rounded-[3rem] overflow-hidden aspect-[4/3] relative border border-white/5">
-                      {/* Image Overlay Glows */}
                       <div className="absolute inset-0 bg-gradient-to-t from-[#020617] via-transparent to-transparent z-10 opacity-60"></div>
                       <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_0%,rgba(37,99,235,0.2),transparent)] z-10 pointer-events-none"></div>
                       
-                      {/* High-Fidelity Dashboard UI Image */}
                       <img 
                         src="https://res.cloudinary.com/dbn1nlna6/image/upload/v1770881139/hero-img_mmnvnn.jpg" 
                         alt="SMM Dashboard Interface"
                         className="w-full h-full object-cover opacity-90 transition-transform duration-[20s] group-hover:scale-110"
                       />
                       
-                      {/* Interactive Scanners / Tech Visuals */}
                       <div className="absolute inset-0 z-20 pointer-events-none">
                          <div className="absolute top-1/4 left-1/4 w-32 h-32 border border-blue-500/20 rounded-full animate-pulse"></div>
                          <div className="absolute bottom-1/4 right-1/4 w-48 h-48 border border-indigo-500/10 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
@@ -135,7 +133,6 @@ export default function LandingPage({ onSignupClick }: { onSignupClick?: () => v
                     </div>
                   </div>
 
-                  {/* Floating Live Interaction Overlay */}
                   <div className="absolute -bottom-10 -left-6 bg-white dark:bg-[#0f172a] p-6 rounded-[2.5rem] shadow-3xl border border-blue-600/20 animate-float flex items-center gap-5 z-30" style={{ animationDelay: '0.5s' }}>
                     <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-600/40">
                        <TrendingUp size={24} />
@@ -146,7 +143,6 @@ export default function LandingPage({ onSignupClick }: { onSignupClick?: () => v
                     </div>
                   </div>
 
-                  {/* Floating Notification - Right Side */}
                   <div className="absolute -top-6 -right-6 bg-white dark:bg-[#0f172a] p-5 rounded-[2.2rem] shadow-3xl border border-white/10 animate-float flex items-center gap-4 z-30" style={{ animationDelay: '1.5s' }}>
                     <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center text-green-500">
                        <CheckCircle2 size={20} />
@@ -175,7 +171,6 @@ export default function LandingPage({ onSignupClick }: { onSignupClick?: () => v
             ].map((s, i) => (
               <div key={i} className="flex items-center gap-4 group cursor-default">
                 <div className="w-10 h-10 rounded-xl bg-blue-600/10 flex items-center justify-center text-blue-600 transition-all group-hover:bg-blue-600 group-hover:text-white">
-                  {/* Added explicit cast to React.ReactElement<any> to fix 'size' prop TS error */}
                   {React.cloneElement(s.icon as React.ReactElement<any>, { size: 18 })}
                 </div>
                 <div className="text-left">
@@ -214,7 +209,7 @@ export default function LandingPage({ onSignupClick }: { onSignupClick?: () => v
                       </div>
                     ))}
                   </div>
-                  <button onClick={onSignupClick} className="w-full bg-blue-600 text-white font-black py-5 rounded-[1.5rem] shadow-xl shadow-blue-600/20 hover:scale-[1.02] transition-all flex items-center justify-center gap-3">
+                  <button onClick={() => navigate('/billing')} className="w-full bg-blue-600 text-white font-black py-5 rounded-[1.5rem] shadow-xl shadow-blue-600/20 hover:scale-[1.02] transition-all flex items-center justify-center gap-3">
                     Start Protocol <Rocket size={20} />
                   </button>
                 </div>
@@ -237,7 +232,6 @@ export default function LandingPage({ onSignupClick }: { onSignupClick?: () => v
                       : 'bg-white dark:bg-[#050b1a] border-slate-200 dark:border-white/5 text-slate-900 dark:text-white hover:border-blue-600/30'}`}
                   >
                     <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-6 transition-transform group-hover:scale-110 ${selectedPlatform === p.id ? 'bg-white/20' : 'bg-blue-500/10 text-blue-500'}`}>
-                      {/* Added explicit cast to React.ReactElement<any> to fix 'size' prop TS error */}
                       {React.cloneElement(p.icon as React.ReactElement<any>, { size: 32 })}
                     </div>
                     <span className="font-black text-xl mb-1 tracking-tight">{p.name}</span>
@@ -262,14 +256,14 @@ export default function LandingPage({ onSignupClick }: { onSignupClick?: () => v
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { step: "01", title: "Join Node", desc: "Create your secure account in seconds. Identity verification is instant and encrypted.", icon: <Users /> },
-              { step: "02", title: "Fund Credit", desc: "Add balance via global gateways. Support for CC, Crypto, and local transfer protocols.", icon: <CreditCard /> },
-              { step: "03", title: "Execute Order", desc: "Select service, input link, and watch as our delivery protocols trigger instantly.", icon: <Zap /> }
+              { step: "01", title: "Join Node", desc: "Create your secure account in seconds. Identity verification is instant and encrypted.", icon: <Users />, action: onSignupClick },
+              { step: "02", title: "Fund Credit", desc: "Add balance via global gateways. Support for CC, Crypto, and local transfer protocols.", icon: <CreditCard />, action: () => navigate('/billing') },
+              { step: "03", title: "Execute Order", desc: "Select service, input link, and watch as our delivery protocols trigger instantly.", icon: <Zap />, action: () => navigate('/') }
             ].map((s, i) => (
-              <RevealSection key={i} className="relative p-12 bg-white dark:bg-[#020617] rounded-[3rem] border border-slate-200 dark:border-white/5 shadow-sm group hover:border-blue-500 transition-colors">
+              <RevealSection key={i} className="relative p-12 bg-white dark:bg-[#020617] rounded-[3rem] border border-slate-200 dark:border-white/5 shadow-sm group hover:border-blue-500 transition-colors cursor-pointer" 
+                 onClick={s.action}>
                 <div className="absolute top-8 right-10 text-5xl font-black text-slate-100 dark:text-white/5 group-hover:text-blue-500/10 transition-colors">{s.step}</div>
                 <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center text-white mb-10 shadow-xl shadow-blue-600/20 group-hover:scale-110 transition-transform">
-                   {/* Added explicit cast to React.ReactElement<any> to fix 'size' prop TS error */}
                    {React.cloneElement(s.icon as React.ReactElement<any>, { size: 28 })}
                 </div>
                 <h4 className="text-2xl font-black text-slate-900 dark:text-white mb-4 tracking-tight">{s.title}</h4>
@@ -292,14 +286,13 @@ export default function LandingPage({ onSignupClick }: { onSignupClick?: () => v
                   </div>
                   <h3 className="text-4xl md:text-5xl font-black mb-6 tracking-tighter leading-none">Algorithm-Synced <br />Growth Intelligence</h3>
                   <p className="text-white/80 text-xl font-medium max-w-lg mb-8">We don't just provide numbers. We provide algorithm-compliant growth that survives platform updates and manual reviews.</p>
-                  <button onClick={onSignupClick} className="self-start bg-white text-blue-600 px-10 py-5 rounded-[1.5rem] font-black hover:scale-105 transition-all shadow-2xl">Get Started Free</button>
+                  <button onClick={() => navigate('/billing')} className="self-start bg-white text-blue-600 px-10 py-5 rounded-[1.5rem] font-black hover:scale-105 transition-all shadow-2xl">Manage Wallet</button>
                </div>
                <div className="absolute top-10 right-10 opacity-10 animate-pulse-slow">
                  <Globe size={300} />
                </div>
             </RevealSection>
 
-            {/* API Support */}
             <RevealSection className="md:col-span-3 lg:col-span-4 lg:row-span-2 bg-slate-900 dark:bg-[#050b1a] rounded-[3.5rem] p-10 border border-white/5 flex flex-col justify-between group">
                <div className="flex justify-between items-start">
                   <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center text-blue-500 group-hover:bg-blue-600 group-hover:text-white transition-all">
@@ -313,7 +306,6 @@ export default function LandingPage({ onSignupClick }: { onSignupClick?: () => v
                </div>
             </RevealSection>
 
-            {/* Support */}
             <RevealSection className="md:col-span-3 lg:col-span-4 lg:row-span-2 bg-slate-50 dark:bg-[#050b1a] rounded-[3.5rem] p-10 border border-slate-200 dark:border-white/5 flex flex-col justify-between group">
                <div className="flex justify-between items-start">
                   <div className="w-12 h-12 bg-blue-600/10 rounded-xl flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all">
@@ -327,7 +319,6 @@ export default function LandingPage({ onSignupClick }: { onSignupClick?: () => v
                </div>
             </RevealSection>
 
-            {/* Stability */}
             <RevealSection className="md:col-span-6 lg:col-span-4 lg:row-span-1 bg-white dark:bg-[#050b1a] rounded-[2.5rem] p-8 border border-slate-200 dark:border-white/5 flex items-center gap-6 group">
                <div className="w-12 h-12 bg-blue-600/5 dark:bg-white/5 rounded-xl flex items-center justify-center text-blue-600 shrink-0">
                  <ShieldCheck size={24} />
@@ -352,10 +343,10 @@ export default function LandingPage({ onSignupClick }: { onSignupClick?: () => v
               <p className="text-white/80 text-lg md:text-2xl mb-12 max-w-2xl mx-auto font-medium leading-relaxed">Join 12,000+ professional resellers who have switched to DzD for stability, speed, and margin growth.</p>
               <div className="flex flex-col sm:flex-row gap-6 justify-center">
                  <button 
-                  onClick={onSignupClick}
+                  onClick={() => navigate('/billing')}
                   className="bg-white text-blue-600 px-12 py-6 rounded-[1.5rem] font-black text-xl hover:scale-105 hover:shadow-2xl transition-all active:scale-95"
                 >
-                  Create Account Free
+                  Go to My Wallet
                 </button>
                 <button className="bg-blue-800/40 backdrop-blur-md text-white px-12 py-6 rounded-[1.5rem] font-black text-xl border border-white/20 hover:bg-blue-800/60 transition-all">
                   Contact Support
@@ -363,7 +354,6 @@ export default function LandingPage({ onSignupClick }: { onSignupClick?: () => v
               </div>
             </div>
 
-            {/* Decorative background circle */}
             <div className="absolute -top-24 -left-24 w-96 h-96 border-[40px] border-white/5 rounded-full pointer-events-none"></div>
             <div className="absolute -bottom-24 -right-24 w-96 h-96 border-[40px] border-white/5 rounded-full pointer-events-none"></div>
           </div>
