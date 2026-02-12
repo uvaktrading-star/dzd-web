@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   CreditCard, Upload, Landmark, Smartphone, ShieldCheck, 
   AlertCircle, Wallet as WalletIcon, History, MessageSquare, 
-  ArrowUpRight, Clock, CheckCircle2, Copy, Check
+  ArrowUpRight, Clock, CheckCircle2, Copy, Check, Bell, X
 } from 'lucide-react';
 
 const WORKER_URL = "https://dzd-billing-api.sitewasd2026.workers.dev";
@@ -13,6 +13,16 @@ export default function BillingPageView({ user }: any) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [copied, setCopied] = useState(false);
   const [userBalance, setUserBalance] = useState({ total_balance: "0.00", pending_balance: "0.00" });
+  
+  // Custom Notification State
+  const [toast, setToast] = useState<{ show: boolean, msg: string, type: 'success' | 'error' }>({
+    show: false, msg: '', type: 'success'
+  });
+
+  const showNotification = (msg: string, type: 'success' | 'error') => {
+    setToast({ show: true, msg, type });
+    setTimeout(() => setToast({ ...toast, show: false }), 4000);
+  };
 
   const fetchBalance = async (uid: string) => {
     try {
@@ -37,7 +47,8 @@ export default function BillingPageView({ user }: any) {
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedFile || !user) return alert("Please select a receipt.");
+    if (!selectedFile || !user) return showNotification("Please select a receipt.", "error");
+    
     setUploading(true);
     const formData = new FormData();
     formData.append("userId", user.uid);
@@ -48,16 +59,34 @@ export default function BillingPageView({ user }: any) {
     try {
       const response = await fetch(`${WORKER_URL}/submit-deposit`, { method: "POST", body: formData });
       if (response.ok) {
-        alert("Deposit submitted for verification!");
+        showNotification("Deposit submitted for verification successfully!", "success");
         setAmount(''); setSelectedFile(null); fetchBalance(user.uid);
+      } else {
+        showNotification("Submission failed. Please try again.", "error");
       }
-    } catch (error) { alert("Error occurred!"); }
-    finally { setUploading(false); }
+    } catch (error) { 
+      showNotification("A network error occurred!", "error");
+    } finally { 
+      setUploading(false); 
+    }
   };
 
   return (
-    <div className="animate-fade-in space-y-8 pb-16 px-4 md:px-0">
+    <div className="animate-fade-in space-y-8 pb-16 px-4 md:px-0 relative">
       
+      {/* --- CUSTOM NOTIFICATION TOAST --- */}
+      {toast.show && (
+        <div className={`fixed top-5 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-3 px-6 py-4 rounded-2xl shadow-2xl border animate-in slide-in-from-top duration-300 ${
+          toast.type === 'success' ? 'bg-emerald-500 border-emerald-400 text-white' : 'bg-red-500 border-red-400 text-white'
+        }`}>
+          {toast.type === 'success' ? <CheckCircle2 size={20} /> : <AlertCircle size={20} />}
+          <p className="text-xs font-black uppercase tracking-widest">{toast.msg}</p>
+          <button onClick={() => setToast({ ...toast, show: false })} className="ml-4 opacity-70 hover:opacity-100">
+            <X size={18} />
+          </button>
+        </div>
+      )}
+
       {/* --- PREMIUM HEADER --- */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 pt-4">
         <div>
@@ -69,12 +98,18 @@ export default function BillingPageView({ user }: any) {
             <ShieldCheck size={12} className="text-blue-500" /> Secure Protocol: {user?.uid?.substring(0, 12)}
           </p>
         </div>
-        <div className="flex gap-3 w-full sm:w-auto">
+        <div className="flex gap-3 w-full sm:w-auto items-center">
            <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 px-6 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all">
              <History size={16} /> History
            </button>
-           <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-600/20">
+           <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all">
              <MessageSquare size={16} /> Support
+           </button>
+           
+           {/* Notification Bell Icon */}
+           <button className="relative p-3.5 bg-slate-100 dark:bg-white/5 rounded-2xl text-slate-500 hover:text-blue-500 transition-all border border-transparent hover:border-blue-500/20 group">
+              <Bell size={20} />
+              <span className="absolute top-3 right-3 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-[#0f172a]"></span>
            </button>
         </div>
       </div>
@@ -111,7 +146,6 @@ export default function BillingPageView({ user }: any) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* --- BANK DETAILS --- */}
         <div className="lg:col-span-5 space-y-6">
            <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 ml-2">Authorized Gateways</h3>
            
@@ -140,7 +174,6 @@ export default function BillingPageView({ user }: any) {
            </div>
         </div>
 
-        {/* --- UPLOAD SECTION --- */}
         <div className="lg:col-span-7">
            <div className="bg-white dark:bg-[#0f172a]/40 rounded-[3rem] p-6 md:p-10 border border-slate-200 dark:border-white/5 shadow-sm relative overflow-hidden">
               <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight mb-8 flex items-center gap-3">
@@ -187,13 +220,15 @@ export default function BillingPageView({ user }: any) {
                     </p>
                  </div>
 
-                 {/* --- RE-DESIGNED SUBMIT BUTTON --- */}
                  <button 
                     disabled={uploading}
-                    className="w-full bg-blue-600 text-white py-6 rounded-[2rem] font-black text-sm uppercase tracking-[0.5em] shadow-xl shadow-blue-600/30 hover:bg-blue-700 hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-50 flex items-center justify-center min-h-[70px]"
+                    className="w-full bg-blue-600 text-white py-6 rounded-[2rem] font-black text-sm uppercase tracking-[0.5em] shadow-xl shadow-blue-600/30 hover:bg-blue-700 hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-70 flex items-center justify-center min-h-[70px]"
                  >
                     {uploading ? (
-                      <div className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        <span>SUBMITTING...</span>
+                      </div>
                     ) : (
                       "SUBMIT"
                     )}
