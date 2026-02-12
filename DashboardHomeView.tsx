@@ -1,28 +1,54 @@
-
 import React from 'react';
-import { PlusCircle, Wallet, PieChart, CreditCard, Mail, Zap, TrendingUp } from 'lucide-react';
+import { PlusCircle, Wallet, PieChart, CreditCard, Mail, Zap, TrendingUp, ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function DashboardHomeView({ user, balance }: any) {
+  const navigate = useNavigate();
+
   return (
     <div className="animate-fade-in space-y-8">
+      {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
           <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">System Overview</h1>
-          <p className="text-slate-500 font-bold uppercase tracking-widest text-[10px] mt-1 tracking-[0.2em]">Commanding: {user?.fullName || user?.email}</p>
+          <p className="text-slate-500 font-bold uppercase tracking-widest text-[10px] mt-1 tracking-[0.2em]">
+            Commanding: {user?.fullName || user?.email}
+          </p>
         </div>
         <button className="flex items-center gap-2 bg-blue-600 text-white px-8 py-4 rounded-2xl font-black shadow-xl shadow-blue-600/20 text-sm hover:scale-105 active:scale-95 transition-all">
           <PlusCircle size={18} /> New Deployment
         </button>
       </div>
 
+      {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Available Balance Card (Clickable) */}
+        <div 
+          onClick={() => navigate('/wallet')}
+          className="bg-white dark:bg-[#0f172a]/40 p-6 rounded-[2.5rem] border border-slate-200 dark:border-white/5 shadow-sm hover:border-blue-500/50 transition-all cursor-pointer group relative overflow-hidden"
+        >
+          <div className="flex justify-between items-start mb-6">
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-white bg-blue-600 shadow-lg shadow-blue-600/20">
+              <Wallet size={22} />
+            </div>
+            <span className="text-[10px] font-black text-blue-500 bg-blue-500/10 px-2 py-1 rounded-lg uppercase tracking-widest flex items-center gap-1 group-hover:bg-blue-600 group-hover:text-white transition-all">
+              Add Funds <ArrowRight size={10} />
+            </span>
+          </div>
+          <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Available Balance</p>
+          <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">${balance || '0.00'}</h3>
+          
+          {/* Subtle Hover Effect Background */}
+          <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-blue-600/5 rounded-full blur-2xl group-hover:bg-blue-600/10 transition-all"></div>
+        </div>
+
+        {/* Other Stats Cards */}
         {[
-          { label: 'Available Balance', value: `$${balance || '0.00'}`, icon: <Wallet />, color: 'bg-blue-600', trend: 'Live Sync' },
           { label: 'Active Tasks', value: '12', icon: <PieChart />, color: 'bg-pink-600', trend: '+4 New' },
           { label: 'Total Volume', value: '$1,890', icon: <CreditCard />, color: 'bg-green-600', trend: 'Verified' },
           { label: 'System Tickets', value: '0', icon: <Mail />, color: 'bg-orange-600', trend: 'Clear' }
         ].map((stat, i) => (
-          <div key={i} className="bg-white dark:bg-[#0f172a]/40 p-6 rounded-[2.5rem] border border-slate-200 dark:border-white/5 shadow-sm hover:border-blue-500/30 transition-colors">
+          <div key={i} className="bg-white dark:bg-[#0f172a]/40 p-6 rounded-[2.5rem] border border-slate-200 dark:border-white/5 shadow-sm">
             <div className="flex justify-between items-start mb-6">
               <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white ${stat.color} shadow-lg shadow-inherit/20`}>
                 {React.cloneElement(stat.icon as any, { size: 22 })}
@@ -35,7 +61,9 @@ export default function DashboardHomeView({ user, balance }: any) {
         ))}
       </div>
 
+      {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Execution History */}
         <div className="lg:col-span-2 bg-white dark:bg-[#0f172a]/40 p-8 rounded-[3rem] border border-slate-200 dark:border-white/5">
           <div className="flex justify-between items-center mb-8">
              <h3 className="text-xl font-black tracking-tight uppercase tracking-widest text-xs text-slate-400">Execution History</h3>
@@ -49,7 +77,9 @@ export default function DashboardHomeView({ user, balance }: any) {
             ].map((o, i) => (
               <div key={i} className="flex items-center justify-between p-5 rounded-3xl bg-slate-50 dark:bg-slate-900/30 border border-slate-200 dark:border-white/5 group hover:bg-white dark:hover:bg-blue-600/5 transition-all">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-white dark:bg-slate-800 rounded-2xl flex items-center justify-center text-blue-500 group-hover:scale-110 transition-transform shadow-sm border border-slate-100 dark:border-white/5"><Zap size={20} /></div>
+                  <div className="w-12 h-12 bg-white dark:bg-slate-800 rounded-2xl flex items-center justify-center text-blue-500 group-hover:scale-110 transition-transform shadow-sm border border-slate-100 dark:border-white/5">
+                    <Zap size={20} />
+                  </div>
                   <div>
                     <p className="font-bold text-sm text-slate-900 dark:text-white">{o.s}</p>
                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-0.5">Node: 0x4829{i}</p>
@@ -64,6 +94,7 @@ export default function DashboardHomeView({ user, balance }: any) {
           </div>
         </div>
         
+        {/* Quick Deploy */}
         <div className="bg-white dark:bg-[#0f172a]/40 p-8 rounded-[3rem] border border-slate-200 dark:border-white/5 flex flex-col">
           <h3 className="text-xl font-black mb-8 tracking-tight uppercase tracking-widest text-xs text-slate-400">Quick Deploy</h3>
           <div className="space-y-5 flex-1">
@@ -78,9 +109,9 @@ export default function DashboardHomeView({ user, balance }: any) {
               <label className="text-[10px] font-black uppercase text-slate-400 ml-1 tracking-widest">Target Path (URL)</label>
               <input className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-white/5 rounded-2xl py-4 px-4 text-sm font-bold focus:border-blue-500 outline-none text-slate-900 dark:text-white" placeholder="https://..." />
             </div>
-            <div className="mt-auto">
+            <div className="mt-auto pt-6">
               <button className="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-blue-600/30 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3">
-                 Activate <TrendingUp size={18} />
+                  Activate <TrendingUp size={18} />
               </button>
             </div>
           </div>
