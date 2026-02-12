@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -11,6 +10,7 @@ import SignupPage from './SignupPage';
 import DashboardPage from './DashboardPage';
 import OnboardingPage from './OnboardingPage';
 import ForgotPasswordPage from './ForgotPasswordPage';
+import BillingPageView from './wallute/BillingPageView';
 
 export default function App() {
   const [theme, setTheme] = useState('dark');
@@ -105,6 +105,10 @@ export default function App() {
             <Route path="/onboarding" element={<OnboardingPage user={user} onComplete={handleOnboardingComplete} />} />
             <Route path="/dashboard" element={<DashboardPage user={user} />} />
             <Route path="/forgot" element={<ForgotPasswordPage />} />
+            
+            {/* --- අලුතින් එකතු කළ කොටස: Wallet සඳහා Route එක --- */}
+            <Route path="/wallet" element={<BillingPageView user={user} />} />
+            
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </main>
