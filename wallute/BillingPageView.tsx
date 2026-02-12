@@ -56,7 +56,7 @@ export default function BillingPageView({ user }: any) {
   };
 
   return (
-    <div className="animate-fade-in space-y-8 pb-20 px-4 md:px-0">
+    <div className="animate-fade-in space-y-8 pb-16 px-4 md:px-0">
       
       {/* --- PREMIUM HEADER --- */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 pt-4">
@@ -70,10 +70,10 @@ export default function BillingPageView({ user }: any) {
           </p>
         </div>
         <div className="flex gap-3 w-full sm:w-auto">
-           <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 px-6 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/10 transition-all">
+           <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 px-6 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all">
              <History size={16} /> History
            </button>
-           <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-600/20 hover:scale-105 transition-all">
+           <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-600/20">
              <MessageSquare size={16} /> Support
            </button>
         </div>
@@ -81,30 +81,23 @@ export default function BillingPageView({ user }: any) {
 
       {/* --- BALANCE GRID --- */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Main Balance Card */}
-        <div className="relative group overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-blue-600 to-blue-700 p-8 text-white shadow-2xl shadow-blue-600/30">
-          <div className="relative z-10 flex flex-col h-full justify-between">
-            <div>
-               <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80 mb-1">Available Credits</p>
-               <h3 className="text-5xl font-black tracking-tighter tabular-nums flex items-baseline gap-2">
-                 <span className="text-xl opacity-60">LKR</span> {userBalance.total_balance}
-               </h3>
-            </div>
-            <div className="mt-8 flex items-center justify-between">
-               <div className="px-4 py-2 bg-white/10 backdrop-blur-md rounded-xl text-[9px] font-black uppercase tracking-widest border border-white/10">
-                 System Status: Optimal
-               </div>
-               <WalletIcon size={32} className="opacity-40" />
+        <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-blue-600 to-blue-700 p-8 text-white shadow-2xl shadow-blue-600/30">
+          <div className="relative z-10">
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80 mb-1">Available Credits</p>
+            <h3 className="text-5xl font-black tracking-tighter tabular-nums flex items-baseline gap-2">
+              <span className="text-xl opacity-60">LKR</span> {userBalance.total_balance}
+            </h3>
+            <div className="mt-8">
+              <span className="px-4 py-2 bg-white/10 backdrop-blur-md rounded-xl text-[9px] font-black uppercase tracking-widest border border-white/10">System Status: Optimal</span>
             </div>
           </div>
-          <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-3xl group-hover:bg-white/20 transition-all duration-700"></div>
+          <WalletIcon size={120} className="absolute -right-8 -bottom-8 opacity-10 rotate-12" />
         </div>
 
-        {/* Pending Balance Card */}
-        <div className="rounded-[2.5rem] bg-white dark:bg-[#0f172a]/40 p-8 border border-slate-200 dark:border-white/5 flex flex-col justify-between group">
+        <div className="rounded-[2.5rem] bg-white dark:bg-[#0f172a]/40 p-8 border border-slate-200 dark:border-white/5 flex flex-col justify-between">
            <div>
               <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Pending Clearance</p>
-              <h3 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter tabular-nums italic">
+              <h3 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter tabular-nums">
                 LKR {userBalance.pending_balance}
               </h3>
            </div>
@@ -112,7 +105,7 @@ export default function BillingPageView({ user }: any) {
               <div className="flex h-2 flex-1 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden">
                  <div className="w-1/3 bg-amber-500 animate-pulse"></div>
               </div>
-              <span className="text-[9px] font-black uppercase text-amber-500 tracking-widest">Verifying...</span>
+              <span className="text-[9px] font-black uppercase text-amber-500 tracking-widest">Verifying</span>
            </div>
         </div>
       </div>
@@ -120,46 +113,43 @@ export default function BillingPageView({ user }: any) {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* --- BANK DETAILS --- */}
         <div className="lg:col-span-5 space-y-6">
-           <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 ml-2">Payment Gateways</h3>
+           <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 ml-2">Authorized Gateways</h3>
            
-           <div className="bg-white dark:bg-[#0f172a]/40 rounded-[2rem] p-6 border border-slate-200 dark:border-white/5 relative group transition-all hover:border-blue-500/30">
+           <div className="bg-white dark:bg-[#0f172a]/40 rounded-[2rem] p-6 border border-slate-200 dark:border-white/5 relative">
               <div className="flex justify-between items-start mb-6">
                  <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-500">
                     <Landmark size={24} />
                  </div>
-                 <button 
-                  onClick={() => copyToClipboard("801012345678")}
-                  className="p-2 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg transition-colors text-slate-400 hover:text-blue-500"
-                 >
-                    {copied ? <Check size={16} /> : <Copy size={16} />}
+                 <button onClick={() => copyToClipboard("801012345678")} className="p-2 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg transition-colors">
+                    {copied ? <Check size={16} className="text-green-500" /> : <Copy size={16} className="text-slate-400" />}
                  </button>
               </div>
-              <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Commercial Bank (Main)</p>
+              <p className="text-[9px] font-black text-slate-500 uppercase mb-1">Commercial Bank</p>
               <h4 className="text-lg font-black text-slate-900 dark:text-white mb-4">DZD MARKETING</h4>
               <div className="bg-slate-50 dark:bg-black/20 p-4 rounded-xl border border-slate-100 dark:border-white/5">
                  <p className="text-xs font-mono font-black text-blue-500 tracking-widest">8010 1234 5678</p>
               </div>
            </div>
 
-           <div className="bg-white dark:bg-[#0f172a]/40 rounded-[2rem] p-6 border border-slate-200 dark:border-white/5 transition-all hover:border-orange-500/30">
-              <div className="flex items-center gap-4 mb-4">
-                 <div className="w-10 h-10 bg-orange-500/10 rounded-xl flex items-center justify-center text-orange-500 italic font-black text-xs">ez</div>
-                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-white">Mobile Wallets</span>
+           <div className="bg-white dark:bg-[#0f172a]/40 rounded-[2rem] p-6 border border-slate-200 dark:border-white/5 flex items-center gap-4">
+              <div className="w-10 h-10 bg-orange-500/10 rounded-xl flex items-center justify-center text-orange-500 font-black italic text-xs">ez</div>
+              <div>
+                 <p className="text-[9px] font-black text-slate-400 uppercase">Mobile Wallet</p>
+                 <p className="text-lg font-black text-slate-900 dark:text-white font-mono">071 234 5678</p>
               </div>
-              <p className="text-xl font-black text-slate-900 dark:text-white tracking-widest font-mono">071 234 5678</p>
            </div>
         </div>
 
         {/* --- UPLOAD SECTION --- */}
         <div className="lg:col-span-7">
-           <div className="bg-white dark:bg-[#0f172a]/40 rounded-[3rem] p-8 md:p-10 border border-slate-200 dark:border-white/5 shadow-sm relative overflow-hidden">
+           <div className="bg-white dark:bg-[#0f172a]/40 rounded-[3rem] p-6 md:p-10 border border-slate-200 dark:border-white/5 shadow-sm relative overflow-hidden">
               <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight mb-8 flex items-center gap-3">
                  <ArrowUpRight className="text-blue-500" /> DEPOSIT INTERFACE
               </h3>
 
               <form onSubmit={handleUpload} className="space-y-6">
                  <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase text-slate-400 ml-1 tracking-widest italic">Transaction Amount</label>
+                    <label className="text-[10px] font-black uppercase text-slate-400 ml-1 tracking-widest">Transaction Amount (LKR)</label>
                     <div className="relative">
                        <input 
                           type="number"
@@ -169,24 +159,22 @@ export default function BillingPageView({ user }: any) {
                           placeholder="0.00"
                           required
                        />
-                       <span className="absolute left-6 top-1/2 -translate-y-1/2 text-blue-500 font-black text-xs uppercase tracking-widest border-r border-slate-200 dark:border-white/10 pr-3">LKR</span>
+                       <span className="absolute left-6 top-1/2 -translate-y-1/2 text-blue-500 font-black text-xs border-r border-slate-200 dark:border-white/10 pr-3">LKR</span>
                     </div>
                  </div>
 
                  <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase text-slate-400 ml-1 tracking-widest italic">Proof of Transaction</label>
-                    <label className="flex flex-col items-center justify-center w-full aspect-[4/2] border-2 border-dashed border-slate-200 dark:border-white/10 rounded-[2rem] bg-slate-50 dark:bg-black/10 cursor-pointer hover:bg-slate-100 dark:hover:bg-white/5 transition-all group overflow-hidden">
+                    <label className="text-[10px] font-black uppercase text-slate-400 ml-1 tracking-widest">Upload Receipt</label>
+                    <label className="flex flex-col items-center justify-center w-full min-h-[160px] border-2 border-dashed border-slate-200 dark:border-white/10 rounded-[2rem] bg-slate-50 dark:bg-black/10 cursor-pointer hover:bg-slate-100 transition-all p-4 text-center">
                        {selectedFile ? (
-                          <div className="flex items-center gap-3 text-blue-500 font-black text-xs uppercase italic tracking-widest animate-in zoom-in-95">
-                             <CheckCircle2 size={20} /> {selectedFile.name.substring(0, 20)}...
+                          <div className="text-blue-500 font-black text-xs uppercase italic flex items-center gap-2">
+                             <CheckCircle2 size={20} /> {selectedFile.name.substring(0, 25)}
                           </div>
                        ) : (
-                          <div className="flex flex-col items-center">
-                             <div className="w-12 h-12 rounded-full bg-white dark:bg-white/5 flex items-center justify-center mb-3 text-slate-400 group-hover:text-blue-500 transition-colors">
-                                <Upload size={24} />
-                             </div>
-                             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Click to upload receipt</span>
-                          </div>
+                          <>
+                             <Upload size={24} className="text-slate-400 mb-2" />
+                             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Select Image File</span>
+                          </>
                        )}
                        <input type="file" className="hidden" accept="image/*" onChange={(e) => setSelectedFile(e.target.files ? e.target.files[0] : null)} required />
                     </label>
@@ -195,22 +183,19 @@ export default function BillingPageView({ user }: any) {
                  <div className="bg-amber-500/5 border border-amber-500/10 p-5 rounded-2xl flex items-start gap-4">
                     <AlertCircle className="text-amber-500 shrink-0 mt-0.5" size={18} />
                     <p className="text-[10px] font-bold text-slate-500 uppercase leading-relaxed tracking-wide">
-                      Verification takes 15-30 mins. Uploading false documents will result in a permanent ban.
+                      Verification takes 15-30 mins. False uploads lead to account termination.
                     </p>
                  </div>
 
-                 {/* --- BIGGER & BOLDER SUBMIT BUTTON --- */}
+                 {/* --- RE-DESIGNED SUBMIT BUTTON --- */}
                  <button 
                     disabled={uploading}
-                    className="w-full bg-blue-600 text-white py-7 rounded-[2rem] font-black text-sm uppercase tracking-[0.4em] shadow-2xl shadow-blue-600/40 hover:bg-blue-700 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-4 group"
+                    className="w-full bg-blue-600 text-white py-6 rounded-[2rem] font-black text-sm uppercase tracking-[0.5em] shadow-xl shadow-blue-600/30 hover:bg-blue-700 hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-50 flex items-center justify-center min-h-[70px]"
                  >
                     {uploading ? (
                       <div className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin"></div>
                     ) : (
-                      <>
-                        EXECUTE DEPOSIT PROTOCOL
-                        <ArrowUpRight size={20} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                      </>
+                      "SUBMIT"
                     )}
                  </button>
               </form>
