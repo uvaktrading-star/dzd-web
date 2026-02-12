@@ -180,30 +180,45 @@ export default function DashboardPage({ user }: any) {
         </div>
       </main>
 
-      {/* MOBILE BOTTOM NAV */}
-{/* MOBILE BOTTOM NAV - Compact */}
-<nav className="md:hidden fixed bottom-0 left-0 w-full h-14 bg-white dark:bg-[#050b1a] border-t border-slate-200 dark:border-white/10 flex items-center justify-around z-50">
-  {menuItems.slice(0, 4).map(item => (
-    <button 
-      key={item.id}
-      onClick={() => setActiveTab(item.id)}
-      className={`flex flex-col items-center justify-center flex-1 h-full transition-colors ${
-        activeTab === item.id 
-          ? 'text-blue-600 dark:text-blue-400' 
-          : 'text-slate-500'
-      }`}
-    >
-      {React.cloneElement(item.icon as any, { 
-        size: 20, 
-        strokeWidth: activeTab === item.id ? 2.5 : 2 
-      })}
-    </button>
-  ))}
+{/* MOBILE BOTTOM NAV - Icon + Label */}
+<nav className="md:hidden fixed bottom-0 left-0 w-full h-16 bg-white dark:bg-[#050b1a] border-t border-slate-200 dark:border-white/10 flex items-center justify-between px-2 z-50">
+
+  {menuItems.slice(0, 4).map(item => {
+    const isActive = activeTab === item.id;
+
+    return (
+      <button
+        key={item.id}
+        onClick={() => setActiveTab(item.id)}
+        className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-200 ${
+          isActive 
+            ? 'text-blue-600 dark:text-blue-400' 
+            : 'text-slate-500'
+        }`}
+      >
+        {React.cloneElement(item.icon as any, {
+          size: 20,
+          strokeWidth: isActive ? 2.5 : 2
+        })}
+
+        <span className={`text-[10px] mt-1 font-semibold tracking-wide ${
+          isActive ? 'opacity-100' : 'opacity-80'
+        }`}>
+          {item.label.split(' ')[0]}
+        </span>
+      </button>
+    );
+  })}
 
   <button className="flex flex-col items-center justify-center flex-1 h-full text-slate-500">
     <Menu size={20} />
+    <span className="text-[10px] mt-1 font-semibold tracking-wide">
+      Menu
+    </span>
   </button>
+
 </nav>
+
 
     </div>
   );
