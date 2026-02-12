@@ -32,6 +32,7 @@ export default function ServicesPageView() {
   const [visibleCount, setVisibleCount] = useState(25);
   const [showHeader, setShowHeader] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const topRef = useRef<HTMLDivElement>(null);
 
   const PAGE_SIZE = 40;
 
@@ -98,12 +99,24 @@ export default function ServicesPageView() {
     setVisibleCount(prev => prev + PAGE_SIZE);
   };
 
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+    setShowHeader(true);
+    setLastScrollY(0);
+  };
+
   return (
     <div className="relative animate-fade-in pb-32">
+      {/* Invisible anchor at very top for scroll reference */}
+      <div ref={topRef} className="absolute top-0 left-0 w-0 h-0" />
+      
       {/* Main Header - No sticky, just normal flow with transform hide/show */}
       <div 
         className={`-mx-4 md:-mx-8 lg:-mx-12 px-4 md:px-8 lg:px-12 pt-6 md:pt-8 pb-6 bg-[#fcfdfe] dark:bg-[#020617] border-b border-slate-200 dark:border-white/5 shadow-sm transition-all duration-300 ${
-          showHeader ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0 pointer-events-none absolute'
+          showHeader ? 'translate-y-0 opacity-100 relative' : '-translate-y-full opacity-0 pointer-events-none absolute'
         }`}
       >
         <div className="max-w-6xl mx-auto space-y-4 md:space-y-6">
@@ -153,42 +166,40 @@ export default function ServicesPageView() {
         </div>
       </div>
 
-      {/* Sticky Mini Header - Only appears when main header is hidden */}
-      <div 
-        className={`sticky top-0 z-40 -mx-4 md:-mx-8 lg:-mx-12 px-4 md:px-8 lg:px-12 py-3 bg-[#fcfdfe]/95 dark:bg-[#020617]/95 backdrop-blur-2xl border-b border-slate-200 dark:border-white/5 shadow-sm transition-all duration-300 ${
-          showHeader ? 'opacity-0 pointer-events-none -translate-y-full' : 'opacity-100 translate-y-0'
-        }`}
-      >
-        <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row gap-2 md:gap-3">
-            <div className="flex-1 relative group">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={16} />
-              <input 
-                type="text" 
-                placeholder="Search protocols..." 
-                value={searchTerm}
-                onChange={(e) => { setSearchTerm(e.target.value); setVisibleCount(25); }}
-                className="w-full bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl py-2.5 pl-9 pr-4 font-bold text-xs focus:border-blue-600 outline-none transition-all"
-              />
-            </div>
-            
-            <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-0.5 md:max-w-md">
-              {categories.slice(0, 8).map(cat => (
-                <button 
-                  key={cat} 
-                  onClick={() => { setActiveCategory(cat); setVisibleCount(25); }}
-                  className={`px-3 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest whitespace-nowrap transition-all border flex-shrink-0 ${activeCategory === cat ? 'bg-blue-600 text-white border-blue-600' : 'bg-white dark:bg-white/5 text-slate-500 border-slate-200 dark:border-white/5'}`}
-                >
-                  {cat}
-                </button>
-              ))}
+      {/* Sticky Mini Header - Only appears when main header is hidden - COMPLETELY REMOVED FROM LAYOUT WHEN HIDDEN */}
+      {!showHeader && (
+        <div className="sticky top-0 z-40 -mx-4 md:-mx-8 lg:-mx-12 px-4 md:px-8 lg:px-12 py-3 bg-[#fcfdfe]/95 dark:bg-[#020617]/95 backdrop-blur-2xl border-b border-slate-200 dark:border-white/5 shadow-sm transition-all duration-300">
+          <div className="max-w-6xl mx-auto">
+            <div className="flex flex-col md:flex-row gap-2 md:gap-3">
+              <div className="flex-1 relative group">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={16} />
+                <input 
+                  type="text" 
+                  placeholder="Search protocols..." 
+                  value={searchTerm}
+                  onChange={(e) => { setSearchTerm(e.target.value); setVisibleCount(25); }}
+                  className="w-full bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl py-2.5 pl-9 pr-4 font-bold text-xs focus:border-blue-600 outline-none transition-all"
+                />
+              </div>
+              
+              <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-0.5 md:max-w-md">
+                {categories.slice(0, 8).map(cat => (
+                  <button 
+                    key={cat} 
+                    onClick={() => { setActiveCategory(cat); setVisibleCount(25); }}
+                    className={`px-3 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest whitespace-nowrap transition-all border flex-shrink-0 ${activeCategory === cat ? 'bg-blue-600 text-white border-blue-600' : 'bg-white dark:bg-white/5 text-slate-500 border-slate-200 dark:border-white/5'}`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* Services Grid - Removed top padding */}
-      <div className="mt-0">
+      {/* Services Grid - NO MARGIN/PADDING AT ALL */}
+      <div className="mt-0 pt-0">
         {/* Desktop Data Grid */}
         <div className="hidden md:block bg-white dark:bg-[#0f172a]/40 rounded-[2.5rem] border border-slate-200 dark:border-white/5 overflow-hidden shadow-sm">
           <table className="w-full text-left">
@@ -298,17 +309,10 @@ export default function ServicesPageView() {
         </div>
       )}
 
-      {/* Floating Scroll To Top for Mobile UX - FIXED */}
+      {/* Floating Scroll To Top for Mobile UX - FIXED WITH DIRECT FUNCTION CALL */}
       <button 
-        onClick={() => {
-          window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-          });
-          setShowHeader(true);
-          setLastScrollY(0);
-        }}
-        className="fixed bottom-24 right-6 md:right-10 w-12 h-12 bg-white dark:bg-slate-900 rounded-full flex items-center justify-center text-blue-600 shadow-2xl border border-slate-200 dark:border-white/10 z-50 md:hidden active:scale-90 transition-transform"
+        onClick={scrollToTop}
+        className="fixed bottom-24 right-6 md:right-10 w-12 h-12 bg-white dark:bg-slate-900 rounded-full flex items-center justify-center text-blue-600 shadow-2xl border border-slate-200 dark:border-white/10 z-50 md:hidden active:scale-90 transition-transform hover:bg-blue-600 hover:text-white"
       >
         <ChevronUp size={24} />
       </button>
