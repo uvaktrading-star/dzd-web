@@ -24,6 +24,7 @@ const getStatusBadges = (name: string) => {
 };
 
 export default function ServicesPageView({ scrollContainerRef }: any) {
+  const dropdownRef = useRef(null);
   const [categoriesOpen, setCategoriesOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
@@ -79,23 +80,22 @@ export default function ServicesPageView({ scrollContainerRef }: any) {
     };
   }, [lastScrollY]);
 
-  useEffect(() => {
+useEffect(() => {
   const handleClickOutside = (event: MouseEvent) => {
-    const target = event.target as HTMLElement;
-    if (!target.closest('.relative')) {
+    if (
+      dropdownRef.current &&
+      !dropdownRef.current.contains(event.target as Node)
+    ) {
       setCategoriesOpen(false);
     }
   };
 
-  if (categoriesOpen) {
-    window.addEventListener('click', handleClickOutside);
-  } else {
-    window.removeEventListener('click', handleClickOutside);
-  }
+  document.addEventListener('mousedown', handleClickOutside);
 
-  return () => window.removeEventListener('click', handleClickOutside);
-}, [categoriesOpen]);
-
+  return () => {
+    document.removeEventListener('mousedown', handleClickOutside);
+  };
+}, []);
 
   const categories = useMemo(() => {
     return ['All', ...Array.from(new Set(services.map(s => String(s.category))))];
@@ -174,7 +174,7 @@ const scrollToTop = () => {
             
 <div className="relative flex flex-col lg:flex-row gap-3">
   {/* Categories Menu Button */}
-  <div className="relative">
+  <div className="relative" ref={dropdownRef}>
     <button
       onClick={() => setCategoriesOpen(!categoriesOpen)}
       className="flex items-center justify-between w-40 px-5 py-2 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl font-bold text-sm shadow-md hover:shadow-xl transition-all hover:bg-blue-50 dark:hover:bg-slate-800 focus:outline-none"
@@ -187,30 +187,38 @@ const scrollToTop = () => {
       />
     </button>
 
-    {/* Dropdown Menu */}
-    {categoriesOpen && (
-      <div className="absolute z-50 mt-2 w-60 max-h-80 overflow-y-auto bg-white dark:bg-[#020617] border border-slate-200 dark:border-white/10 rounded-2xl shadow-lg p-3 animate-fade-in">
-        <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => {
-                setActiveCategory(cat);
-                setVisibleCount(25);
-                setCategoriesOpen(false);
-              }}
-              className={`flex items-center justify-center px-3 py-2 rounded-xl text-sm font-black uppercase tracking-wide transition-all duration-200 ${
-                activeCategory === cat
-                  ? 'bg-blue-600 text-white shadow-lg'
-                  : 'bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-800'
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-      </div>
-    )}
+{/* Dropdown Menu */}
+{categoriesOpen && (
+  <div className="absolute z-50 mt-2 w-60 max-h-72 overflow-y-auto bg-white dark:bg-[#020617] border border-slate-200 dark:border-white/10 rounded-xl shadow-xl p-2 backdrop-blur-sm">
+
+    <div className="space-y-1">
+      {categories.map(cat => (
+        <button
+          key={cat}
+          onClick={() => {
+            setActiveCategory(cat);
+            setVisibleCount(25);
+            setCategoriesOpen(false);
+          }}
+          className={`group w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold tracking-wide transition-all duration-200 flex items-center justify-between ${
+            activeCategory === cat
+              ? 'bg-blue-600 text-white shadow-md'
+              : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+          }`}
+        >
+          <span>{cat}</span>
+
+          {/* Small indicator dot */}
+          {activeCategory === cat && (
+            <span className="w-2 h-2 bg-white rounded-full"></span>
+          )}
+        </button>
+      ))}
+    </div>
+
+  </div>
+)}
+
   </div>
 </div>
 
