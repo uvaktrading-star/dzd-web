@@ -23,6 +23,7 @@ export default function BillingPageView({ user }: any) {
 
   const showNotification = (msg: string, type: 'success' | 'error') => {
     setToast({ show: true, msg, type });
+    setTimeout(() => setToast(prev => ({ ...prev, show: false })), 3000);
   };
 
   const fetchBalance = async (uid: string) => {
@@ -59,7 +60,6 @@ export default function BillingPageView({ user }: any) {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const clearOne = (id: any) => setNotifications(prev => prev.filter(n => n.id !== id));
   const clearAll = () => { setNotifications([]); setShowNotifications(false); };
 
   const handleUpload = async (e: React.FormEvent) => {
@@ -89,29 +89,30 @@ export default function BillingPageView({ user }: any) {
   };
 
   return (
-    // මුළු container එකටම desktop වලදී වැඩිපුර padding එකක් (md:pt-10) එක් කළා
-    <div className="animate-fade-in space-y-8 pb-16 px-4 md:px-6 md:pt-10 max-w-7xl mx-auto overflow-hidden">
+    <div className="animate-fade-in space-y-8 pb-20 px-4 md:px-8 pt-24 md:pt-28 max-w-7xl mx-auto overflow-hidden relative min-h-screen">
       
       {/* --- TOAST --- */}
       {toast.show && (
-        <div className={`fixed top-5 left-1/2 -translate-x-1/2 z-[200] flex items-center gap-3 px-5 py-3 rounded-xl shadow-2xl border animate-in slide-in-from-top duration-300 w-[90%] max-w-md ${
-          toast.type === 'success' ? 'bg-emerald-500 border-emerald-400 text-white' : 'bg-red-500 border-red-400 text-white'
-        }`}>
-          {toast.type === 'success' ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
-          <div className="flex-1">
-            <p className="text-[10px] font-black uppercase tracking-tight">System Alert</p>
-            <p className="text-[11px] font-bold opacity-90 leading-tight">{toast.msg}</p>
+        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[250] w-[90%] max-w-md">
+           <div className={`flex items-center gap-3 px-5 py-3 rounded-xl shadow-2xl border animate-in slide-in-from-top duration-300 ${
+            toast.type === 'success' ? 'bg-emerald-500 border-emerald-400 text-white' : 'bg-red-500 border-red-400 text-white'
+          }`}>
+            {toast.type === 'success' ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
+            <div className="flex-1">
+              <p className="text-[10px] font-black uppercase tracking-tight">System Alert</p>
+              <p className="text-[11px] font-bold opacity-90 leading-tight">{toast.msg}</p>
+            </div>
+            <button onClick={() => setToast(prev => ({ ...prev, show: false }))} className="p-1 hover:bg-black/10 rounded-lg">
+              <X size={16} />
+            </button>
           </div>
-          <button onClick={() => setToast(prev => ({ ...prev, show: false }))} className="p-1 hover:bg-black/10 rounded-lg">
-            <X size={16} />
-          </button>
         </div>
       )}
 
       {/* --- NOTIFICATIONS MODAL --- */}
       {showNotifications && (
-        <div className="fixed inset-0 z-[150] flex items-start justify-end p-4 bg-black/20 backdrop-blur-[2px]">
-            <div className="mt-16 w-full max-w-sm bg-white dark:bg-[#0f172a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden animate-in slide-in-from-right-4">
+        <div className="fixed inset-0 z-[200] flex items-start justify-end p-4 bg-black/40 backdrop-blur-sm">
+            <div className="mt-20 w-full max-w-sm bg-white dark:bg-[#0f172a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden animate-in slide-in-from-right-4">
                 <div className="p-4 border-b border-slate-100 dark:border-white/5 flex justify-between items-center bg-slate-50 dark:bg-white/5">
                     <h4 className="text-[10px] font-black uppercase tracking-widest dark:text-white">Alerts</h4>
                     <button onClick={clearAll} className="text-[9px] font-black uppercase text-red-500 flex items-center gap-1">
@@ -122,8 +123,8 @@ export default function BillingPageView({ user }: any) {
                     {notifications.length === 0 ? (
                         <div className="py-10 text-center text-slate-400 text-[9px] font-bold uppercase tracking-widest">No New Alerts</div>
                     ) : (
-                        notifications.map((n) => (
-                            <div key={n.id} className="p-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 relative group">
+                        notifications.map((n, idx) => (
+                            <div key={idx} className="p-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5">
                                 <div className="flex gap-3">
                                     {n.status === 'approved' ? <CheckCircle2 size={14} className="text-emerald-500" /> : <AlertCircle size={14} className="text-red-500" />}
                                     <div>
@@ -140,9 +141,54 @@ export default function BillingPageView({ user }: any) {
         </div>
       )}
 
+      {/* --- HISTORY MODAL --- */}
+      {showHistory && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+          <div className="w-full max-w-2xl bg-white dark:bg-[#0f172a] rounded-[2.5rem] border border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden animate-in zoom-in-95">
+            <div className="p-6 border-b border-slate-100 dark:border-white/5 flex justify-between items-center">
+              <h3 className="text-sm font-black uppercase tracking-widest dark:text-white flex items-center gap-2">
+                <History size={18} className="text-blue-500" /> Transaction_History
+              </h3>
+              <button onClick={() => setShowHistory(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-white/5 rounded-full transition-colors">
+                <X size={20} className="dark:text-white" />
+              </button>
+            </div>
+            <div className="p-4 max-h-[60vh] overflow-y-auto">
+              {history.length === 0 ? (
+                <div className="py-20 text-center text-slate-400 text-xs font-bold uppercase tracking-widest">No transactions found</div>
+              ) : (
+                <div className="space-y-3">
+                  {history.map((item, idx) => (
+                    <div key={idx} className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5">
+                      <div className="flex items-center gap-4">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                          item.status === 'approved' ? 'bg-emerald-500/10 text-emerald-500' : 
+                          item.status === 'rejected' ? 'bg-red-500/10 text-red-500' : 'bg-amber-500/10 text-amber-500'
+                        }`}>
+                          {item.status === 'approved' ? <CheckCircle2 size={18}/> : item.status === 'rejected' ? <X size={18}/> : <Clock size={18}/>}
+                        </div>
+                        <div>
+                          <p className="text-[11px] font-black dark:text-white uppercase">LKR {parseFloat(item.amount).toFixed(2)}</p>
+                          <p className="text-[9px] font-bold text-slate-500 uppercase">{new Date(item.created_at).toLocaleDateString()}</p>
+                        </div>
+                      </div>
+                      <span className={`text-[8px] font-black uppercase px-3 py-1 rounded-full border ${
+                        item.status === 'approved' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' : 
+                        item.status === 'rejected' ? 'bg-red-500/10 border-red-500/20 text-red-500' : 'bg-amber-500/10 border-amber-500/20 text-amber-500'
+                      }`}>
+                        {item.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* --- HEADER --- */}
-      {/* Header එකට පල්ලෙහායින් space එකක් (mb-4) එක් කළා */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 pb-8 border-b border-slate-100 dark:border-white/5 mb-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
         <div className="space-y-1">
           <h1 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tighter flex items-center gap-2 font-mono">
             <div className="w-1.5 h-6 bg-blue-600 rounded-full"></div>
@@ -153,16 +199,15 @@ export default function BillingPageView({ user }: any) {
           </p>
         </div>
         
-        {/* Buttons Container - Desktop වලදී space එක නිවැරදි කළා */}
-        <div className="flex items-center gap-3 w-full md:w-auto overflow-x-auto no-scrollbar py-1">
+        <div className="flex items-center gap-3 w-full md:w-auto">
             <button 
               onClick={() => setShowHistory(true)}
-              className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 px-5 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/10 transition-all active:scale-95 whitespace-nowrap min-w-fit"
+              className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 px-5 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/10 transition-all active:scale-95 whitespace-nowrap"
             >
               <History size={14} /> History
             </button>
 
-            <button className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-blue-600 text-white px-5 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all whitespace-nowrap min-w-fit">
+            <button className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-blue-600 text-white px-5 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all whitespace-nowrap">
               <MessageSquare size={14} /> Support
             </button>
             
@@ -182,19 +227,19 @@ export default function BillingPageView({ user }: any) {
 
       {/* --- BALANCE GRID --- */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 to-blue-700 p-6 md:p-8 text-white shadow-xl shadow-blue-600/20">
+        <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-blue-600 to-blue-700 p-8 text-white shadow-xl shadow-blue-600/20">
           <div className="relative z-10">
             <p className="text-[9px] font-black uppercase tracking-[0.2em] opacity-70 mb-1">Available Credits</p>
-            <h3 className="text-3xl md:text-4xl font-black tracking-tighter tabular-nums flex items-baseline gap-2">
+            <h3 className="text-4xl font-black tracking-tighter tabular-nums flex items-baseline gap-2">
               <span className="text-lg opacity-60">LKR</span> {userBalance.total_balance}
             </h3>
           </div>
-          <WalletIcon size={100} className="absolute -right-6 -bottom-6 opacity-10 rotate-12" />
+          <WalletIcon size={120} className="absolute -right-6 -bottom-6 opacity-10 rotate-12" />
         </div>
 
-        <div className="rounded-3xl bg-white dark:bg-[#0f172a]/40 p-6 md:p-8 border border-slate-200 dark:border-white/5">
+        <div className="rounded-[2rem] bg-white dark:bg-[#0f172a]/40 p-8 border border-slate-200 dark:border-white/5">
             <p className="text-slate-500 text-[9px] font-black uppercase tracking-[0.2em] mb-1">In Verification</p>
-            <h3 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tighter tabular-nums">
+            <h3 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter tabular-nums">
               LKR {userBalance.pending_balance}
             </h3>
             <div className="mt-4 flex items-center gap-2">
@@ -235,7 +280,7 @@ export default function BillingPageView({ user }: any) {
 
         {/* Deposit Interface */}
         <div className="lg:col-span-7">
-           <div className="bg-white dark:bg-[#0f172a]/40 rounded-[2rem] p-6 md:p-8 border border-slate-200 dark:border-white/5 shadow-sm">
+           <div className="bg-white dark:bg-[#0f172a]/40 rounded-[2.5rem] p-6 md:p-8 border border-slate-200 dark:border-white/5 shadow-sm">
               <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight mb-6 flex items-center gap-2 font-mono uppercase">
                  <ArrowUpRight size={18} className="text-blue-500" /> DEPOSIT_NODE
               </h3>
