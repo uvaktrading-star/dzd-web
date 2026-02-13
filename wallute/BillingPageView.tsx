@@ -5,6 +5,9 @@ import {
   ArrowUpRight, Clock, CheckCircle2, Copy, Check, Bell, X, Trash2
 } from 'lucide-react';
 
+// සටහන: ඔබ Next.js භාවිතා කරන්නේ නම් 'next/router' භාවිතා කරන්න. 
+// නැතිනම් window.location.href මගින් redirect කළ හැක.
+
 const WORKER_URL = "https://dzd-billing-api.sitewasd2026.workers.dev";
 
 export default function BillingPageView({ user }: any) {
@@ -22,11 +25,24 @@ export default function BillingPageView({ user }: any) {
     show: false, msg: '', type: 'success'
   });
 
+  // --- REDIRECT LOGIC ---
+  useEffect(() => {
+    // පරිශීලකයා ලොග් වී නැත්නම් Login page එකට යොමු කරයි
+    if (!user) {
+      window.location.href = "/LoginPage"; // ඔබේ login page එකේ url එක මෙතනට දාන්න
+    }
+  }, [user]);
+
   // Load cleared notifications from localStorage on mount
   useEffect(() => {
-    const saved = localStorage.getItem(`cleared_notifs_${user?.uid}`);
-    if (saved) setClearedNotifications(JSON.parse(saved));
+    if (user?.uid) {
+      const saved = localStorage.getItem(`cleared_notifs_${user?.uid}`);
+      if (saved) setClearedNotifications(JSON.parse(saved));
+    }
   }, [user]);
+
+  // User නැතිනම් කිසිවක් Render නොකරයි (Redirect වෙන තෙක්)
+  if (!user) return null;
 
   const showNotification = (msg: string, type: 'success' | 'error') => {
     setToast({ show: true, msg, type });
@@ -50,7 +66,6 @@ export default function BillingPageView({ user }: any) {
       const data = await response.json();
       setHistory(data);
       
-      // Filter out notifications that have been manually cleared
       const alerts = data.filter((item: any) => 
         (item.status === 'approved' || item.status === 'rejected') && 
         !clearedNotifications.includes(item.id || item.created_at)
@@ -128,7 +143,7 @@ export default function BillingPageView({ user }: any) {
         </div>
       )}
 
-      {/* --- NOTIFICATIONS MODAL (NOW CENTERED) --- */}
+      {/* --- NOTIFICATIONS MODAL --- */}
       {showNotifications && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
             <div className="w-full max-w-md bg-white dark:bg-[#0f172a] rounded-[2.5rem] border border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden animate-in zoom-in-95">
@@ -161,6 +176,12 @@ export default function BillingPageView({ user }: any) {
                                             <p className="text-[8px] font-bold text-slate-400">{new Date(n.created_at).toLocaleDateString()}</p>
                                         </div>
                                         <p className="text-sm font-black text-slate-600 dark:text-slate-300 mt-1">LKR {parseFloat(n.amount).toFixed(2)}</p>
+                                        {n.status === 'rejected' && n.reason && (
+                                          <div className="mt-2 p-2 rounded-lg bg-red-500/5 border border-red-500/10">
+                                            <p className="text-[9px] font-bold text-red-500/80 uppercase mb-0.5 tracking-tighter">Admin Reason:</p>
+                                            <p className="text-[10px] font-bold text-slate-500 leading-tight italic">"{n.reason}"</p>
+                                          </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -180,7 +201,7 @@ export default function BillingPageView({ user }: any) {
           <div className="w-full max-w-2xl bg-white dark:bg-[#0f172a] rounded-[2.5rem] border border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden animate-in zoom-in-95">
             <div className="p-6 border-b border-slate-100 dark:border-white/5 flex justify-between items-center">
               <h3 className="text-sm font-black uppercase tracking-widest dark:text-white flex items-center gap-2">
-                <History size={18} className="text-blue-500" /> Transaction_History
+                <History size={18} className="text-blue-500" /> Transaction History
               </h3>
               <button onClick={() => setShowHistory(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-white/5 rounded-full transition-colors">
                 <X size={20} className="dark:text-white" />
@@ -288,7 +309,7 @@ export default function BillingPageView({ user }: any) {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Gateways */}
         <div className="lg:col-span-5 space-y-6">
-           <h3 className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1 font-mono">AUTHORIZED_GATEWAYS</h3>
+           <h3 className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1 font-mono">PAYMENT DETAILS</h3>
            <div className="bg-white dark:bg-[#0f172a]/40 rounded-3xl p-6 border border-slate-200 dark:border-white/5">
               <div className="flex justify-between items-start mb-4">
                  <div className="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center text-blue-500">
@@ -298,14 +319,30 @@ export default function BillingPageView({ user }: any) {
                     {copied ? <Check size={14} className="text-green-500" /> : <Copy size={14} className="text-slate-400" />}
                  </button>
               </div>
-              <p className="text-[8px] font-black text-slate-500 uppercase">BOC Bank (DZD MARKETING)</p>
-              <h4 className="text-xl font-mono font-black text-blue-500 tracking-wider">71782008</h4>
+              <div className="space-y-0.5 mb-3">
+                <p className="text-[8px] font-black text-slate-400 uppercase tracking-tighter">Bank Name</p>
+                <p className="text-[11px] font-black text-slate-900 dark:text-white uppercase">Bank of Ceylon (BOC)</p>
+              </div>
+              <div className="space-y-0.5 mb-3">
+                <p className="text-[8px] font-black text-slate-400 uppercase tracking-tighter">Account Name</p>
+                <p className="text-[11px] font-black text-slate-900 dark:text-white uppercase">Example</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-0.5">
+                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-tighter">Account Number</p>
+                  <h4 className="text-md font-mono font-black text-blue-500 tracking-wider">7178xxxx</h4>
+                </div>
+                <div className="space-y-0.5">
+                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-tighter">Branch</p>
+                  <p className="text-[11px] font-black text-slate-900 dark:text-white uppercase">Mawanella</p>
+                </div>
+              </div>
            </div>
 
            <div className="bg-white dark:bg-[#0f172a]/40 rounded-2xl p-5 border border-slate-200 dark:border-white/5 flex items-center gap-4">
               <div className="w-9 h-9 bg-orange-500/10 rounded-lg flex items-center justify-center text-orange-500 font-black italic text-[10px]">ez</div>
               <div>
-                 <p className="text-[8px] font-black text-slate-400 uppercase">Mobile Wallet</p>
+                 <p className="text-[8px] font-black text-slate-400 uppercase">Mobile Wallet (eZ Cash)</p>
                  <p className="text-md font-mono font-black text-slate-900 dark:text-white">0766247995</p>
               </div>
            </div>
@@ -315,7 +352,7 @@ export default function BillingPageView({ user }: any) {
         <div className="lg:col-span-7">
            <div className="bg-white dark:bg-[#0f172a]/40 rounded-[2.5rem] p-6 md:p-8 border border-slate-200 dark:border-white/5 shadow-sm">
               <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight mb-6 flex items-center gap-2 font-mono uppercase">
-                 <ArrowUpRight size={18} className="text-blue-500" /> DEPOSIT_NODE
+                 <ArrowUpRight size={18} className="text-blue-500" /> UPLOAD DEPOSIT
               </h3>
 
               <form onSubmit={handleUpload} className="space-y-6">
