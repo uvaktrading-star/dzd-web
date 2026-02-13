@@ -199,7 +199,7 @@ export default function BillingPageView({ user }: any) {
         </div>
       )}
 
-      {/* --- HEADER --- */}
+      {/* --- HEADER (FIXED FOR DESKTOP & MOBILE) --- */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 pt-4">
         <div>
           <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-3 font-mono">
@@ -210,21 +210,22 @@ export default function BillingPageView({ user }: any) {
             <ShieldCheck size={12} className="text-blue-500" /> Secure Protocol: {user?.uid?.substring(0, 12)}
           </p>
         </div>
-        <div className="flex gap-3 w-full sm:w-auto items-center">
+        
+        <div className="flex flex-row items-center gap-3 w-full lg:w-auto justify-end">
             <button 
               onClick={() => setShowHistory(true)}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 px-6 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all active:scale-95"
+              className="flex-1 lg:flex-none flex items-center justify-center gap-2 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 px-6 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all active:scale-95 whitespace-nowrap"
             >
               <History size={16} /> History
             </button>
-            <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all">
+
+            <button className="flex-1 lg:flex-none flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all whitespace-nowrap">
               <MessageSquare size={16} /> Support
             </button>
             
-            {/* --- UPDATED NOTIFICATION BUTTON --- */}
             <button 
               onClick={() => setShowNotifications(!showNotifications)}
-              className={`relative p-3.5 rounded-2xl transition-all border ${
+              className={`relative p-3.5 rounded-2xl transition-all border shrink-0 ${
                 showNotifications ? 'bg-blue-600 text-white border-blue-600' : 'bg-slate-100 dark:bg-white/5 text-slate-500 border-transparent hover:border-blue-500/20'
               }`}
             >
@@ -279,7 +280,7 @@ export default function BillingPageView({ user }: any) {
                  <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-500">
                     <Landmark size={24} />
                  </div>
-                 <button onClick={() => copyToClipboard("801012345678")} className="p-2 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg transition-colors">
+                 <button onClick={() => copyToClipboard("801012345678")} className="p-2 hover:bg-slate-100 dark:hover:hover:bg-white/5 rounded-lg transition-colors">
                     {copied ? <Check size={16} className="text-green-500" /> : <Copy size={16} className="text-slate-400" />}
                  </button>
               </div>
