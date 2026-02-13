@@ -237,7 +237,7 @@ export default function BillingPageView({ user }: any) {
         <div className="lg:col-span-7">
            <div className="bg-white dark:bg-[#0f172a]/40 rounded-[2rem] p-6 md:p-8 border border-slate-200 dark:border-white/5 shadow-sm">
               <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight mb-6 flex items-center gap-2 font-mono uppercase">
-                 <ArrowUpRight size={18} className="text-blue-500" /> SUBMIT DEPOSIT
+                 <ArrowUpRight size={18} className="text-blue-500" /> DEPOSIT_NODE
               </h3>
 
               <form onSubmit={handleUpload} className="space-y-6">
@@ -284,7 +284,7 @@ export default function BillingPageView({ user }: any) {
                     disabled={uploading}
                     className="w-full bg-blue-600 text-white py-4 rounded-2xl font-black text-[11px] uppercase tracking-[0.3em] shadow-lg shadow-blue-600/20 hover:bg-blue-700 hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-70 flex items-center justify-center min-h-[56px]"
                  >
-                    {uploading ? "SYNCING..." : "EXECUTE_DEPOSIT"}
+                    {uploading ? "SYNCING..." : "EXECUTE DEPOSIT"}
                  </button>
               </form>
            </div>
