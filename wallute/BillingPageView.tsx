@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   CreditCard, Upload, Landmark, Smartphone, ShieldCheck, 
   AlertCircle, Wallet as WalletIcon, History, MessageSquare, 
-  ArrowUpRight, Clock, CheckCircle2, Copy, Check, Bell, X 
+  ArrowUpRight, Clock, CheckCircle2, Copy, Check, Bell, X, Trash2
 } from 'lucide-react';
 
 const WORKER_URL = "https://dzd-billing-api.sitewasd2026.workers.dev";
@@ -16,6 +16,10 @@ export default function BillingPageView({ user }: any) {
   const [history, setHistory] = useState<any[]>([]);
   const [showHistory, setShowHistory] = useState(false);
   
+  // --- NEW STATES FOR NOTIFICATION PANEL ---
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
+
   const [toast, setToast] = useState<{ show: boolean, msg: string, type: 'success' | 'error' }>({
     show: false, msg: '', type: 'success'
   });
@@ -41,12 +45,10 @@ export default function BillingPageView({ user }: any) {
       const data = await response.json();
       setHistory(data);
       
-      // Notification logic: අන්තිම එක rejected නම් හේතුව පෙන්වන්න
-      if (data.length > 0 && data[0].status === 'rejected') {
-        showNotification(`Reason: ${data[0].reject_reason || 'Verification Failed'}`, 'error');
-      } else if (data.length > 0 && data[0].status === 'approved') {
-        // optionally show success if last was approved
-      }
+      // Filter only approved and rejected ones for notifications
+      const alerts = data.filter((item: any) => item.status === 'approved' || item.status === 'rejected');
+      setNotifications(alerts);
+
     } catch (error) { console.error(error); }
   };
 
@@ -61,6 +63,16 @@ export default function BillingPageView({ user }: any) {
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  // --- NOTIFICATION ACTIONS ---
+  const clearOne = (id: any) => {
+    setNotifications(prev => prev.filter(n => n.id !== id));
+  };
+
+  const clearAll = () => {
+    setNotifications([]);
+    setShowNotifications(false);
   };
 
   const handleUpload = async (e: React.FormEvent) => {
@@ -111,6 +123,41 @@ export default function BillingPageView({ user }: any) {
         </div>
       )}
 
+      {/* --- NOTIFICATION DROPDOWN/MODAL --- */}
+      {showNotifications && (
+        <div className="fixed inset-0 z-[120] flex items-start justify-end p-4 pointer-events-none">
+            <div className="mt-20 w-full max-w-sm bg-white dark:bg-[#0f172a] rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-2xl pointer-events-auto overflow-hidden animate-in slide-in-from-right-4 duration-300">
+                <div className="p-6 border-b border-slate-100 dark:border-white/5 flex justify-between items-center bg-slate-50 dark:bg-white/5">
+                    <h4 className="text-[11px] font-black uppercase tracking-widest dark:text-white">Alert_Center</h4>
+                    <button onClick={clearAll} className="text-[9px] font-black uppercase text-red-500 hover:opacity-70 flex items-center gap-1">
+                        <Trash2 size={12}/> Clear All
+                    </button>
+                </div>
+                <div className="max-h-[400px] overflow-y-auto p-4 space-y-3">
+                    {notifications.length === 0 ? (
+                        <div className="py-10 text-center text-slate-400 text-[10px] font-bold uppercase tracking-widest">No New Alerts</div>
+                    ) : (
+                        notifications.map((n) => (
+                            <div key={n.id} className="p-4 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 relative group">
+                                <button onClick={() => clearOne(n.id)} className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <X size={14} className="text-slate-400" />
+                                </button>
+                                <div className="flex gap-3">
+                                    {n.status === 'approved' ? <CheckCircle2 size={16} className="text-emerald-500 shrink-0" /> : <AlertCircle size={16} className="text-red-500 shrink-0" />}
+                                    <div>
+                                        <p className="text-[10px] font-black dark:text-white uppercase tracking-tight">Deposit {n.status}</p>
+                                        <p className="text-[11px] font-bold text-slate-500 mt-1">LKR {parseFloat(n.amount).toFixed(2)} - {n.status === 'rejected' ? (n.reason || 'Verification Failed') : 'Credits Added'}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+                <button onClick={() => setShowNotifications(false)} className="w-full p-4 text-[10px] font-black uppercase tracking-widest text-slate-400 border-t border-slate-100 dark:border-white/5 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">Close</button>
+            </div>
+        </div>
+      )}
+
       {/* --- HISTORY MODAL --- */}
       {showHistory && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
@@ -138,11 +185,11 @@ export default function BillingPageView({ user }: any) {
                       </div>
                       <div>
                         <p className="text-sm font-black dark:text-white italic tracking-tight">LKR {parseFloat(item.amount).toFixed(2)}</p>
-                        <p className="text-[9px] text-slate-500 font-black uppercase tracking-[0.2em]">{item.status === 'rejected' ? item.reject_reason : item.status}</p>
+                        <p className="text-[9px] text-slate-500 font-black uppercase tracking-[0.2em]">{item.status === 'rejected' ? (item.reason || 'Verification Failed') : item.status}</p>
                       </div>
                     </div>
                     <div className="text-right">
-                       <p className="text-[10px] font-mono text-slate-400">ID: #{item.id.toString().slice(-5)}</p>
+                        <p className="text-[10px] font-mono text-slate-400">ID: #{item.id.toString().slice(-5)}</p>
                     </div>
                   </div>
                 ))
@@ -164,22 +211,28 @@ export default function BillingPageView({ user }: any) {
           </p>
         </div>
         <div className="flex gap-3 w-full sm:w-auto items-center">
-           <button 
-             onClick={() => setShowHistory(true)}
-             className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 px-6 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all active:scale-95"
-           >
-             <History size={16} /> History
-           </button>
-           <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all">
-             <MessageSquare size={16} /> Support
-           </button>
-           
-           <button className="relative p-3.5 bg-slate-100 dark:bg-white/5 rounded-2xl text-slate-500 hover:text-blue-500 transition-all border border-transparent hover:border-blue-500/20 group">
-              <Bell size={20} />
-              {history.some(h => h.status !== 'pending') && (
-                <span className="absolute top-3 right-3 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-[#0f172a]"></span>
-              )}
-           </button>
+            <button 
+              onClick={() => setShowHistory(true)}
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 px-6 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all active:scale-95"
+            >
+              <History size={16} /> History
+            </button>
+            <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all">
+              <MessageSquare size={16} /> Support
+            </button>
+            
+            {/* --- UPDATED NOTIFICATION BUTTON --- */}
+            <button 
+              onClick={() => setShowNotifications(!showNotifications)}
+              className={`relative p-3.5 rounded-2xl transition-all border ${
+                showNotifications ? 'bg-blue-600 text-white border-blue-600' : 'bg-slate-100 dark:bg-white/5 text-slate-500 border-transparent hover:border-blue-500/20'
+              }`}
+            >
+               <Bell size={20} />
+               {notifications.length > 0 && (
+                 <span className="absolute top-3 right-3 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-[#0f172a] animate-pulse"></span>
+               )}
+            </button>
         </div>
       </div>
 
@@ -199,20 +252,20 @@ export default function BillingPageView({ user }: any) {
         </div>
 
         <div className="rounded-[2.5rem] bg-white dark:bg-[#0f172a]/40 p-8 border border-slate-200 dark:border-white/5 flex flex-col justify-between">
-           <div>
+            <div>
               <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Pending Clearance</p>
               <h3 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter tabular-nums">
                 LKR {userBalance.pending_balance}
               </h3>
-           </div>
-           <div className="mt-8 flex items-center gap-3">
+            </div>
+            <div className="mt-8 flex items-center gap-3">
               <div className="flex h-2 flex-1 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden">
                  <div className={`h-full bg-amber-500 transition-all duration-1000 ${parseFloat(userBalance.pending_balance) > 0 ? 'w-1/3 animate-pulse' : 'w-0'}`}></div>
               </div>
               <span className="text-[9px] font-black uppercase text-amber-500 tracking-widest">
                 {parseFloat(userBalance.pending_balance) > 0 ? 'Verifying' : 'Clear'}
               </span>
-           </div>
+            </div>
         </div>
       </div>
 
