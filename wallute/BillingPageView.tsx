@@ -13,6 +13,8 @@ export default function BillingPageView({ user }: any) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [copied, setCopied] = useState(false);
   const [userBalance, setUserBalance] = useState({ total_balance: "0.00", pending_balance: "0.00" });
+  const [history, setHistory] = useState<any[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
   
   const [toast, setToast] = useState<{ show: boolean, msg: string, type: 'success' | 'error' }>({
     show: false, msg: '', type: 'success'
@@ -20,7 +22,6 @@ export default function BillingPageView({ user }: any) {
 
   const showNotification = (msg: string, type: 'success' | 'error') => {
     setToast({ show: true, msg, type });
-    setTimeout(() => setToast(prev => ({ ...prev, show: false })), 4000);
   };
 
   const fetchBalance = async (uid: string) => {
@@ -34,8 +35,26 @@ export default function BillingPageView({ user }: any) {
     } catch (error) { console.error(error); }
   };
 
+  const fetchHistory = async (uid: string) => {
+    try {
+      const response = await fetch(`${WORKER_URL}/get-history?userId=${uid}`);
+      const data = await response.json();
+      setHistory(data);
+      
+      // Notification logic: අන්තිම එක rejected නම් හේතුව පෙන්වන්න
+      if (data.length > 0 && data[0].status === 'rejected') {
+        showNotification(`Reason: ${data[0].reject_reason || 'Verification Failed'}`, 'error');
+      } else if (data.length > 0 && data[0].status === 'approved') {
+        // optionally show success if last was approved
+      }
+    } catch (error) { console.error(error); }
+  };
+
   useEffect(() => {
-    if (user?.uid) fetchBalance(user.uid);
+    if (user?.uid) {
+      fetchBalance(user.uid);
+      fetchHistory(user.uid);
+    }
   }, [user]);
 
   const copyToClipboard = (text: string) => {
@@ -52,7 +71,6 @@ export default function BillingPageView({ user }: any) {
     const formData = new FormData();
     formData.append("userId", user.uid);
     formData.append("email", user.email || "no-email");
-    // Firestore දත්ත මෙතැනින් Worker එකට යයි
     formData.append("username", user.username || user.displayName || "Unknown"); 
     formData.append("amount", amount);
     formData.append("receipt", selectedFile);
@@ -61,7 +79,9 @@ export default function BillingPageView({ user }: any) {
       const response = await fetch(`${WORKER_URL}/submit-deposit`, { method: "POST", body: formData });
       if (response.ok) {
         showNotification("Deposit submitted for verification successfully!", "success");
-        setAmount(''); setSelectedFile(null); fetchBalance(user.uid);
+        setAmount(''); setSelectedFile(null); 
+        fetchBalance(user.uid);
+        fetchHistory(user.uid);
       } else {
         showNotification("Submission failed. Please try again.", "error");
       }
@@ -77,30 +97,77 @@ export default function BillingPageView({ user }: any) {
       
       {/* --- CUSTOM NOTIFICATION TOAST --- */}
       {toast.show && (
-        <div className={`fixed top-5 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-3 px-6 py-4 rounded-2xl shadow-2xl border animate-in slide-in-from-top duration-300 ${
+        <div className={`fixed top-5 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-3 px-6 py-4 rounded-2xl shadow-2xl border animate-in slide-in-from-top duration-300 w-[90%] max-w-md ${
           toast.type === 'success' ? 'bg-emerald-500 border-emerald-400 text-white' : 'bg-red-500 border-red-400 text-white'
         }`}>
           {toast.type === 'success' ? <CheckCircle2 size={20} /> : <AlertCircle size={20} />}
-          <p className="text-xs font-black uppercase tracking-widest">{toast.msg}</p>
-          <button onClick={() => setToast(prev => ({ ...prev, show: false }))} className="ml-4 opacity-70 hover:opacity-100">
+          <div className="flex-1">
+            <p className="text-[10px] font-black uppercase tracking-widest">{toast.type === 'success' ? 'Success' : 'Transaction Alert'}</p>
+            <p className="text-[11px] font-bold opacity-90">{toast.msg}</p>
+          </div>
+          <button onClick={() => setToast(prev => ({ ...prev, show: false }))} className="p-1 hover:bg-black/10 rounded-lg transition-all">
             <X size={18} />
           </button>
         </div>
       )}
 
-      {/* --- PREMIUM HEADER --- */}
+      {/* --- HISTORY MODAL --- */}
+      {showHistory && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-[#0f172a] w-full max-w-2xl rounded-[2.5rem] border border-slate-200 dark:border-white/10 overflow-hidden shadow-2xl">
+            <div className="p-8 border-b border-slate-100 dark:border-white/5 flex justify-between items-center">
+              <h3 className="text-xl font-black tracking-tight dark:text-white flex items-center gap-3 font-mono">
+                <History className="text-blue-500" /> TRANSACTION_LOG
+              </h3>
+              <button onClick={() => setShowHistory(false)} className="p-3 bg-slate-100 dark:bg-white/5 rounded-2xl hover:scale-110 transition-transform">
+                <X size={20} className="dark:text-white" />
+              </button>
+            </div>
+            <div className="p-6 max-h-[60vh] overflow-y-auto space-y-4">
+              {history.length === 0 ? (
+                <div className="py-20 text-center text-slate-500 font-bold uppercase tracking-widest text-xs">No records found</div>
+              ) : (
+                history.map((item) => (
+                  <div key={item.id} className="p-5 bg-slate-50 dark:bg-white/5 rounded-3xl border border-slate-100 dark:border-white/5 flex items-center justify-between group">
+                    <div className="flex items-center gap-4">
+                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
+                        item.status === 'approved' ? 'bg-emerald-500/10 text-emerald-500' : 
+                        item.status === 'rejected' ? 'bg-red-500/10 text-red-500' : 'bg-amber-500/10 text-amber-500'
+                      }`}>
+                        {item.status === 'approved' ? <CheckCircle2 size={20} /> : item.status === 'rejected' ? <X size={20} /> : <Clock size={20} />}
+                      </div>
+                      <div>
+                        <p className="text-sm font-black dark:text-white italic tracking-tight">LKR {parseFloat(item.amount).toFixed(2)}</p>
+                        <p className="text-[9px] text-slate-500 font-black uppercase tracking-[0.2em]">{item.status === 'rejected' ? item.reject_reason : item.status}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                       <p className="text-[10px] font-mono text-slate-400">ID: #{item.id.toString().slice(-5)}</p>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- HEADER --- */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 pt-4">
         <div>
-          <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
+          <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-3 font-mono">
             <div className="w-2 h-8 bg-blue-600 rounded-full hidden md:block"></div>
-            FINANCIAL TERMINAL
+            FINANCIAL_TERMINAL
           </h1>
           <p className="text-slate-500 font-bold uppercase tracking-widest text-[10px] mt-1 flex items-center gap-2">
             <ShieldCheck size={12} className="text-blue-500" /> Secure Protocol: {user?.uid?.substring(0, 12)}
           </p>
         </div>
         <div className="flex gap-3 w-full sm:w-auto items-center">
-           <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 px-6 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all">
+           <button 
+             onClick={() => setShowHistory(true)}
+             className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 px-6 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all active:scale-95"
+           >
              <History size={16} /> History
            </button>
            <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all">
@@ -109,7 +176,9 @@ export default function BillingPageView({ user }: any) {
            
            <button className="relative p-3.5 bg-slate-100 dark:bg-white/5 rounded-2xl text-slate-500 hover:text-blue-500 transition-all border border-transparent hover:border-blue-500/20 group">
               <Bell size={20} />
-              <span className="absolute top-3 right-3 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-[#0f172a]"></span>
+              {history.some(h => h.status !== 'pending') && (
+                <span className="absolute top-3 right-3 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-[#0f172a]"></span>
+              )}
            </button>
         </div>
       </div>
@@ -138,9 +207,11 @@ export default function BillingPageView({ user }: any) {
            </div>
            <div className="mt-8 flex items-center gap-3">
               <div className="flex h-2 flex-1 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden">
-                 <div className="w-1/3 bg-amber-500 animate-pulse"></div>
+                 <div className={`h-full bg-amber-500 transition-all duration-1000 ${parseFloat(userBalance.pending_balance) > 0 ? 'w-1/3 animate-pulse' : 'w-0'}`}></div>
               </div>
-              <span className="text-[9px] font-black uppercase text-amber-500 tracking-widest">Verifying</span>
+              <span className="text-[9px] font-black uppercase text-amber-500 tracking-widest">
+                {parseFloat(userBalance.pending_balance) > 0 ? 'Verifying' : 'Clear'}
+              </span>
            </div>
         </div>
       </div>
@@ -148,7 +219,7 @@ export default function BillingPageView({ user }: any) {
       {/* --- GATEWAYS AND FORM --- */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <div className="lg:col-span-5 space-y-6">
-           <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 ml-2">Authorized Gateways</h3>
+           <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 ml-2 font-mono">AUTHORIZED_GATEWAYS</h3>
            
            <div className="bg-white dark:bg-[#0f172a]/40 rounded-[2rem] p-6 border border-slate-200 dark:border-white/5 relative">
               <div className="flex justify-between items-start mb-6">
@@ -159,31 +230,31 @@ export default function BillingPageView({ user }: any) {
                     {copied ? <Check size={16} className="text-green-500" /> : <Copy size={16} className="text-slate-400" />}
                  </button>
               </div>
-              <p className="text-[9px] font-black text-slate-500 uppercase mb-1">Commercial Bank</p>
+              <p className="text-[9px] font-black text-slate-500 uppercase mb-1">BOC Bank</p>
               <h4 className="text-lg font-black text-slate-900 dark:text-white mb-4">DZD MARKETING</h4>
               <div className="bg-slate-50 dark:bg-black/20 p-4 rounded-xl border border-slate-100 dark:border-white/5">
-                 <p className="text-xs font-mono font-black text-blue-500 tracking-widest">8010 1234 5678</p>
+                 <p className="text-xs font-mono font-black text-blue-500 tracking-widest">71782008</p>
               </div>
            </div>
 
            <div className="bg-white dark:bg-[#0f172a]/40 rounded-[2rem] p-6 border border-slate-200 dark:border-white/5 flex items-center gap-4">
               <div className="w-10 h-10 bg-orange-500/10 rounded-xl flex items-center justify-center text-orange-500 font-black italic text-xs">ez</div>
               <div>
-                 <p className="text-[9px] font-black text-slate-400 uppercase">Mobile Wallet</p>
-                 <p className="text-lg font-black text-slate-900 dark:text-white font-mono">071 234 5678</p>
+                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Mobile Wallet</p>
+                 <p className="text-lg font-black text-slate-900 dark:text-white font-mono tracking-tight">0766247995</p>
               </div>
            </div>
         </div>
 
         <div className="lg:col-span-7">
            <div className="bg-white dark:bg-[#0f172a]/40 rounded-[3rem] p-6 md:p-10 border border-slate-200 dark:border-white/5 shadow-sm relative overflow-hidden">
-              <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight mb-8 flex items-center gap-3">
-                 <ArrowUpRight className="text-blue-500" /> DEPOSIT INTERFACE
+              <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight mb-8 flex items-center gap-3 font-mono uppercase">
+                 <ArrowUpRight className="text-blue-500" /> Deposit_Interface
               </h3>
 
               <form onSubmit={handleUpload} className="space-y-6">
                  <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase text-slate-400 ml-1 tracking-widest">Transaction Amount (LKR)</label>
+                    <label className="text-[10px] font-black uppercase text-slate-400 ml-1 tracking-widest">Amount (LKR)</label>
                     <div className="relative">
                        <input 
                           type="number"
@@ -193,12 +264,12 @@ export default function BillingPageView({ user }: any) {
                           placeholder="0.00"
                           required
                        />
-                       <span className="absolute left-6 top-1/2 -translate-y-1/2 text-blue-500 font-black text-xs border-r border-slate-200 dark:border-white/10 pr-3">LKR</span>
+                       <span className="absolute left-6 top-1/2 -translate-y-1/2 text-blue-500 font-black text-xs border-r border-slate-200 dark:border-white/10 pr-3 font-mono">LKR</span>
                     </div>
                  </div>
 
                  <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase text-slate-400 ml-1 tracking-widest">Upload Receipt</label>
+                    <label className="text-[10px] font-black uppercase text-slate-400 ml-1 tracking-widest font-mono">Upload_Receipt</label>
                     <label className="flex flex-col items-center justify-center w-full min-h-[160px] border-2 border-dashed border-slate-200 dark:border-white/10 rounded-[2rem] bg-slate-50 dark:bg-black/10 cursor-pointer hover:bg-slate-100 transition-all p-4 text-center">
                        {selectedFile ? (
                           <div className="text-blue-500 font-black text-xs uppercase italic flex items-center gap-2">
@@ -228,10 +299,10 @@ export default function BillingPageView({ user }: any) {
                     {uploading ? (
                       <div className="flex items-center gap-3">
                         <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin"></div>
-                        <span>SUBMITTING...</span>
+                        <span className="font-mono">UPLOADING...</span>
                       </div>
                     ) : (
-                      "SUBMIT"
+                      "SUBMIT_DEPOSIT"
                     )}
                  </button>
               </form>
