@@ -45,7 +45,6 @@ export default function BillingPageView({ user }: any) {
       const data = await response.json();
       setHistory(data);
       
-      // Filter only approved and rejected ones for notifications
       const alerts = data.filter((item: any) => item.status === 'approved' || item.status === 'rejected');
       setNotifications(alerts);
 
@@ -65,7 +64,6 @@ export default function BillingPageView({ user }: any) {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // --- NOTIFICATION ACTIONS ---
   const clearOne = (id: any) => {
     setNotifications(prev => prev.filter(n => n.id !== id));
   };
@@ -107,7 +105,7 @@ export default function BillingPageView({ user }: any) {
   return (
     <div className="animate-fade-in space-y-8 pb-16 px-4 md:px-0 relative">
       
-      {/* --- CUSTOM NOTIFICATION TOAST --- */}
+      {/* --- TOAST NOTIFICATION --- */}
       {toast.show && (
         <div className={`fixed top-5 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-3 px-6 py-4 rounded-2xl shadow-2xl border animate-in slide-in-from-top duration-300 w-[90%] max-w-md ${
           toast.type === 'success' ? 'bg-emerald-500 border-emerald-400 text-white' : 'bg-red-500 border-red-400 text-white'
@@ -123,7 +121,7 @@ export default function BillingPageView({ user }: any) {
         </div>
       )}
 
-      {/* --- NOTIFICATION DROPDOWN/MODAL --- */}
+      {/* --- NOTIFICATION DROPDOWN --- */}
       {showNotifications && (
         <div className="fixed inset-0 z-[120] flex items-start justify-end p-4 pointer-events-none">
             <div className="mt-20 w-full max-w-sm bg-white dark:bg-[#0f172a] rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-2xl pointer-events-auto overflow-hidden animate-in slide-in-from-right-4 duration-300">
@@ -199,7 +197,7 @@ export default function BillingPageView({ user }: any) {
         </div>
       )}
 
-      {/* --- HEADER (FIXED FOR DESKTOP & MOBILE) --- */}
+      {/* --- RE-DESIGNED HEADER --- */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 pt-4">
         <div>
           <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-3 font-mono">
@@ -211,21 +209,22 @@ export default function BillingPageView({ user }: any) {
           </p>
         </div>
         
-        <div className="flex flex-row items-center gap-3 w-full lg:w-auto justify-end">
+        {/* Button Container - Ensures visibility on all devices */}
+        <div className="flex items-center gap-2 md:gap-3 w-full lg:w-auto overflow-x-auto pb-2 lg:pb-0">
             <button 
               onClick={() => setShowHistory(true)}
-              className="flex-1 lg:flex-none flex items-center justify-center gap-2 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 px-6 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all active:scale-95 whitespace-nowrap"
+              className="flex-1 lg:flex-none flex items-center justify-center gap-2 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 px-4 md:px-6 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all active:scale-95 whitespace-nowrap min-w-fit"
             >
-              <History size={16} /> History
+              <History size={16} /> <span className="inline">History</span>
             </button>
 
-            <button className="flex-1 lg:flex-none flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all whitespace-nowrap">
-              <MessageSquare size={16} /> Support
+            <button className="flex-1 lg:flex-none flex items-center justify-center gap-2 bg-blue-600 text-white px-4 md:px-6 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all whitespace-nowrap min-w-fit">
+              <MessageSquare size={16} /> <span className="inline">Support</span>
             </button>
             
             <button 
               onClick={() => setShowNotifications(!showNotifications)}
-              className={`relative p-3.5 rounded-2xl transition-all border shrink-0 ${
+              className={`relative p-3.5 rounded-2xl transition-all border shrink-0 min-w-[48px] flex items-center justify-center ${
                 showNotifications ? 'bg-blue-600 text-white border-blue-600' : 'bg-slate-100 dark:bg-white/5 text-slate-500 border-transparent hover:border-blue-500/20'
               }`}
             >
@@ -280,7 +279,7 @@ export default function BillingPageView({ user }: any) {
                  <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-500">
                     <Landmark size={24} />
                  </div>
-                 <button onClick={() => copyToClipboard("801012345678")} className="p-2 hover:bg-slate-100 dark:hover:hover:bg-white/5 rounded-lg transition-colors">
+                 <button onClick={() => copyToClipboard("801012345678")} className="p-2 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg transition-colors">
                     {copied ? <Check size={16} className="text-green-500" /> : <Copy size={16} className="text-slate-400" />}
                  </button>
               </div>
