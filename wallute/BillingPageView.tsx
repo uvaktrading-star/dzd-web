@@ -17,9 +17,16 @@ export default function BillingPageView({ user }: any) {
   const [showHistory, setShowHistory] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
+  const [clearedNotifications, setClearedNotifications] = useState<string[]>([]);
   const [toast, setToast] = useState<{ show: boolean, msg: string, type: 'success' | 'error' }>({
     show: false, msg: '', type: 'success'
   });
+
+  // Load cleared notifications from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem(`cleared_notifs_${user?.uid}`);
+    if (saved) setClearedNotifications(JSON.parse(saved));
+  }, [user]);
 
   const showNotification = (msg: string, type: 'success' | 'error') => {
     setToast({ show: true, msg, type });
@@ -42,7 +49,12 @@ export default function BillingPageView({ user }: any) {
       const response = await fetch(`${WORKER_URL}/get-history?userId=${uid}`);
       const data = await response.json();
       setHistory(data);
-      const alerts = data.filter((item: any) => item.status === 'approved' || item.status === 'rejected');
+      
+      // Filter out notifications that have been manually cleared
+      const alerts = data.filter((item: any) => 
+        (item.status === 'approved' || item.status === 'rejected') && 
+        !clearedNotifications.includes(item.id || item.created_at)
+      );
       setNotifications(alerts);
     } catch (error) { console.error(error); }
   };
@@ -52,7 +64,7 @@ export default function BillingPageView({ user }: any) {
       fetchBalance(user.uid);
       fetchHistory(user.uid);
     }
-  }, [user]);
+  }, [user, clearedNotifications]);
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -60,7 +72,14 @@ export default function BillingPageView({ user }: any) {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const clearAll = () => { setNotifications([]); setShowNotifications(false); };
+  const clearAll = () => {
+    const allIds = notifications.map(n => n.id || n.created_at);
+    const newClearedList = [...clearedNotifications, ...allIds];
+    setClearedNotifications(newClearedList);
+    localStorage.setItem(`cleared_notifs_${user?.uid}`, JSON.stringify(newClearedList));
+    setNotifications([]);
+    setShowNotifications(false);
+  };
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,34 +128,48 @@ export default function BillingPageView({ user }: any) {
         </div>
       )}
 
-      {/* --- NOTIFICATIONS MODAL --- */}
+      {/* --- NOTIFICATIONS MODAL (NOW CENTERED) --- */}
       {showNotifications && (
-        <div className="fixed inset-0 z-[200] flex items-start justify-end p-4 bg-black/40 backdrop-blur-sm">
-            <div className="mt-20 w-full max-w-sm bg-white dark:bg-[#0f172a] rounded-3xl border border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden animate-in slide-in-from-right-4">
-                <div className="p-4 border-b border-slate-100 dark:border-white/5 flex justify-between items-center bg-slate-50 dark:bg-white/5">
-                    <h4 className="text-[10px] font-black uppercase tracking-widest dark:text-white">Alerts</h4>
-                    <button onClick={clearAll} className="text-[9px] font-black uppercase text-red-500 flex items-center gap-1">
-                        <Trash2 size={12}/> Clear
-                    </button>
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+            <div className="w-full max-w-md bg-white dark:bg-[#0f172a] rounded-[2.5rem] border border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden animate-in zoom-in-95">
+                <div className="p-6 border-b border-slate-100 dark:border-white/5 flex justify-between items-center bg-slate-50 dark:bg-white/5">
+                    <h4 className="text-[10px] font-black uppercase tracking-widest dark:text-white flex items-center gap-2">
+                        <Bell size={16} className="text-blue-500" /> System_Alerts
+                    </h4>
+                    <div className="flex items-center gap-4">
+                        <button onClick={clearAll} className="text-[9px] font-black uppercase text-red-500 flex items-center gap-1 hover:opacity-80 transition-opacity">
+                            <Trash2 size={12}/> Clear All
+                        </button>
+                        <button onClick={() => setShowNotifications(false)} className="p-1.5 hover:bg-slate-200 dark:hover:bg-white/10 rounded-full transition-colors">
+                            <X size={18} className="dark:text-white" />
+                        </button>
+                    </div>
                 </div>
-                <div className="max-h-[350px] overflow-y-auto p-3 space-y-2">
+                <div className="max-h-[50vh] overflow-y-auto p-4 space-y-3">
                     {notifications.length === 0 ? (
-                        <div className="py-10 text-center text-slate-400 text-[9px] font-bold uppercase tracking-widest">No New Alerts</div>
+                        <div className="py-20 text-center text-slate-400 text-[9px] font-bold uppercase tracking-widest">No New Alerts</div>
                     ) : (
                         notifications.map((n, idx) => (
-                            <div key={idx} className="p-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5">
-                                <div className="flex gap-3">
-                                    {n.status === 'approved' ? <CheckCircle2 size={14} className="text-emerald-500" /> : <AlertCircle size={14} className="text-red-500" />}
-                                    <div>
-                                        <p className="text-[9px] font-black dark:text-white uppercase">Deposit {n.status}</p>
-                                        <p className="text-[10px] font-bold text-slate-500">LKR {parseFloat(n.amount).toFixed(2)}</p>
+                            <div key={idx} className="p-4 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5">
+                                <div className="flex gap-4">
+                                    <div className={`p-2 rounded-xl shrink-0 ${n.status === 'approved' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`}>
+                                        {n.status === 'approved' ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
+                                    </div>
+                                    <div className="flex-1">
+                                        <div className="flex justify-between items-start">
+                                            <p className="text-[10px] font-black dark:text-white uppercase tracking-tight">Deposit {n.status}</p>
+                                            <p className="text-[8px] font-bold text-slate-400">{new Date(n.created_at).toLocaleDateString()}</p>
+                                        </div>
+                                        <p className="text-sm font-black text-slate-600 dark:text-slate-300 mt-1">LKR {parseFloat(n.amount).toFixed(2)}</p>
                                     </div>
                                 </div>
                             </div>
                         ))
                     )}
                 </div>
-                <button onClick={() => setShowNotifications(false)} className="w-full p-3 text-[10px] font-black uppercase tracking-widest text-slate-400 border-t border-slate-100 dark:border-white/5">Close</button>
+                <div className="p-4 border-t border-slate-100 dark:border-white/5">
+                    <button onClick={() => setShowNotifications(false)} className="w-full py-3 bg-slate-100 dark:bg-white/5 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10 transition-all">Close</button>
+                </div>
             </div>
         </div>
       )}
@@ -192,7 +225,7 @@ export default function BillingPageView({ user }: any) {
         <div className="space-y-1">
           <h1 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tighter flex items-center gap-2 font-mono">
             <div className="w-1.5 h-6 bg-blue-600 rounded-full"></div>
-            FINANCIAL_CORE
+            FINANCIAL CORE
           </h1>
           <p className="text-slate-500 font-bold uppercase tracking-[0.2em] text-[9px] flex items-center gap-1.5">
             <ShieldCheck size={10} className="text-blue-500" /> Protocol: {user?.uid?.substring(0, 10)}
